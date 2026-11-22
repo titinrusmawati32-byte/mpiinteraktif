@@ -1,0 +1,20 @@
+{
+  "name": "tk-alkhoiriyah-sumberejo",
+  "version": "1.0.0",
+  "description": "Aplikasi Pembelajaran Interaktif TK Al Khoiriyah Sumberejo - Kelompok A (4-5 Tahun)",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve .",
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "paud",
+    "tk",
+    "pendidikan-anak-usia-dini",
+    "edugame",
+    "web-audio-api",
+    "interaktif"
+  ],
+  "author": "TK Al Khoiriyah Sumberejo",
+  "license": "MIT"
+}
