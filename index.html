@@ -281,10 +281,10 @@ window.INLINE_BG_PETUNJUK = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/
           <span class="hidden sm:inline" id="voiceText">Suara: Nyala</span>
         </button>
 
-        <button onclick="openModal('modalTeacherPortal')" class="action-pill-btn text-indigo-700 border-indigo-200" title="Portal Database Guru & Manajemen Konten">
+        <a href="guru.html" class="action-pill-btn text-indigo-700 border-indigo-200" title="Buka Portal Guru & Manajemen Konten">
           <span>⚙️</span>
           <span>Portal Guru</span>
-        </button>
+        </a>
       </div>
     </div>
 
@@ -1223,21 +1223,40 @@ window.INLINE_BG_PETUNJUK = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/
     }
 
     function syncFromBackend() {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(res => {
+      // 1. Check local storage cache first
+      try {
+        const cached = localStorage.getItem('TK_LOCAL_DATA');
+        if (cached) {
+          const cData = JSON.parse(cached);
+          if (cData.videos && cData.videos.length > 0) {
+            videoList = cData.videos.map(v => ({ id: v.ID || v.id, title: v.Judul || v.title, desc: v.Deskripsi || v.desc, url: v.URL_Video || v.url, type: v.Tipe || v.type }));
+            renderVideoChannels();
+          }
+          if (cData.stories && cData.stories.length > 0) {
+            storyPages = cData.stories.map(s => ({ page: s.Halaman || s.page, title: s.Judul_Halaman || s.title, text: s.Isi_Cerita || s.text, emoji: s.Ikon_Emoji || s.emoji || '📖' }));
+            renderStoryPage();
+          }
+        }
+      } catch(e) {}
+
+      // 2. If Google Apps Script URL is configured, fetch live updates from Google Sheets
+      const apiUrl = localStorage.getItem('TK_ALKHOIRIYAH_API_URL') || 'https://script.google.com/macros/s/AKfycbyniBElkM6CcIDpVB4Xg1_a6Fxo2NIFOp45IozjeZ1fT0ONfKlmtPFA_gKqIfTbX7-NA/exec';
+      if (apiUrl) {
+        fetch(apiUrl + '?action=getAllData')
+          .then(res => res.json())
+          .then(res => {
             if (res && res.status === 'success') {
               if (res.videos && res.videos.length > 0) {
-                videoList = res.videos.map(v => ({ id: v.ID, title: v.Judul, desc: v.Deskripsi, url: v.URL_Video, type: v.Tipe }));
+                videoList = res.videos.map(v => ({ id: v.ID || v.id, title: v.Judul || v.title, desc: v.Deskripsi || v.desc, url: v.URL_Video || v.url, type: v.Tipe || v.type }));
                 renderVideoChannels();
               }
               if (res.stories && res.stories.length > 0) {
-                storyPages = res.stories.map(s => ({ page: s.Halaman, title: s.Judul_Halaman, text: s.Isi_Cerita, emoji: s.Ikon_Emoji || '📖' }));
+                storyPages = res.stories.map(s => ({ page: s.Halaman || s.page, title: s.Judul_Halaman || s.title, text: s.Isi_Cerita || s.text, emoji: s.Ikon_Emoji || s.emoji || '📖' }));
                 renderStoryPage();
               }
             }
           })
-          .apiGetAllData();
+          .catch(err => console.log('Offline / using local cache'));
       }
     }
 

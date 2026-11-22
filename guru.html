@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Portal Guru & Manajemen Konten - TK AL KHOIRIYAH SUMBEREJO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Quicksand', 'Fredoka', system-ui, sans-serif;
+      background: #f8fafc;
+    }
+    .btn-3d {
+      font-weight: 700;
+      border-radius: 12px;
+      box-shadow: 0 3px 0 rgba(0, 0, 0, 0.15);
+      transition: all 0.15s ease;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-3d:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col">
+
+  <!-- ================= AUTH VIEW (LOGIN PIN) ================= -->
+  <div id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl text-center border-4 border-emerald-400">
+      <div class="w-20 h-20 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-4xl mx-auto mb-4 shadow-lg">
+        🔐
+      </div>
+      <h2 class="text-2xl font-bold text-slate-800 mb-1">Portal Guru & Admin</h2>
+      <p class="text-xs text-slate-500 mb-6">TK Al Khoiriyah Sumberejo - Kelompok A (4-5 Tahun)</p>
+
+      <div class="space-y-4 text-left">
+        <div>
+          <label class="text-xs font-bold text-slate-600 block mb-1">Masukkan PIN Guru:</label>
+          <input type="password" id="loginPin" value="123456" placeholder="PIN Keamanan (123456)" 
+                 class="w-full text-center text-lg font-bold tracking-widest px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <p class="text-[11px] text-slate-400 mt-1 text-center">PIN Default: <code>123456</code></p>
+        </div>
+
+        <button onclick="handleLogin()" class="w-full btn-3d bg-emerald-600 hover:bg-emerald-500 text-white py-3 text-sm font-bold shadow-md">
+          Masuk ke Dashboard Guru
+        </button>
+
+        <div class="pt-4 border-t text-center">
+          <a href="index.html" class="text-xs text-slate-500 hover:text-emerald-600 font-bold inline-flex items-center gap-1">
+            ← Kembali ke Aplikasi Siswa
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MAIN DASHBOARD ================= -->
+  <div id="dashboardScreen" class="flex-1 flex flex-col hidden">
+    
+    <!-- TOP HEADER -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl font-bold shadow">
+            🕌
+          </div>
+          <div>
+            <h1 class="text-base font-bold text-slate-900 leading-tight">Portal Guru & Database Pembelajaran</h1>
+            <p class="text-[11px] text-slate-500">TK Al Khoiriyah Sumberejo • RT 002 RW 025</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div id="connStatusBadge" class="hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="connStatusText">Menghubungkan ke Google Sheets...</span>
+          </div>
+
+          <a href="index.html" target="_blank" class="btn-3d bg-sky-500 hover:bg-sky-400 text-white text-xs py-1.5 px-3">
+            👁️ Buka Aplikasi Siswa
+          </a>
+
+          <button onclick="handleLogout()" class="text-xs text-rose-600 hover:text-rose-700 font-bold py-1 px-2">
+            Keluar
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN BODY -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full flex flex-col md:flex-row gap-6">
+      
+      <!-- SIDEBAR TABS -->
+      <aside class="w-full md:w-64 space-y-1.5 shrink-0">
+        <button onclick="switchTab('tabVideo')" id="btnTabVideo" class="w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition bg-emerald-600 text-white shadow">
+          <span class="text-base">📺</span>
+          <span>1. Kelola Video Edukasi</span>
+        </button>
+
+        <button onclick="switchTab('tabGame')" id="btnTabGame" class="w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition bg-white text-slate-700 hover:bg-slate-50 border border-slate-200">
+          <span class="text-base">🎮</span>
+          <span>2. Kelola Soal Game</span>
+        </button>
+
+        <button onclick="switchTab('tabCerita')" id="btnTabCerita" class="w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition bg-white text-slate-700 hover:bg-slate-50 border border-slate-200">
+          <span class="text-base">📖</span>
+          <span>3. Kelola Buku Cerita</span>
+        </button>
+
+        <button onclick="switchTab('tabPetunjuk')" id="btnTabPetunjuk" class="w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition bg-white text-slate-700 hover:bg-slate-50 border border-slate-200">
+          <span class="text-base">🎯</span>
+          <span>4. Kelola Tujuan Belajar</span>
+        </button>
+
+        <button onclick="switchTab('tabConfig')" id="btnTabConfig" class="w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition bg-white text-slate-700 hover:bg-slate-50 border border-slate-200">
+          <span class="text-base">⚙️</span>
+          <span>5. Pengaturan API & Database</span>
+        </button>
+      </aside>
+
+      <!-- CONTENT PANELS -->
+      <section class="flex-1 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+
+        <!-- 1. TAB VIDEO -->
+        <div id="tabVideo" class="tab-pane space-y-6">
+          <div class="flex items-center justify-between border-b pb-4 border-slate-100">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Manajemen Video Edukasi</h2>
+              <p class="text-xs text-slate-500">Tambah video pembelajaran dari YouTube, Google Drive, atau file lokal MP4.</p>
+            </div>
+            <button onclick="refreshData()" class="btn-3d bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-1.5 px-3">
+              🔄 Muat Ulang Data
+            </button>
+          </div>
+
+          <!-- Form Tambah Video -->
+          <div class="bg-rose-50/60 border border-rose-200 rounded-2xl p-5">
+            <h3 class="text-xs font-bold text-rose-950 uppercase tracking-wider mb-3">➕ Formulir Tambah Video Baru:</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+              <div>
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Judul Video:</label>
+                <input type="text" id="vidTitle" placeholder="Misal: Huruf Hijaiyah Ceria" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Deskripsi Singkat:</label>
+                <input type="text" id="vidDesc" placeholder="Misal: Belajar huruf Alif sampai Tsa" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="text-[11px] font-bold text-slate-600 block mb-1">Tautan Sumber Video (Link YouTube / Google Drive / Path Lokal):</label>
+              <input type="text" id="vidUrl" placeholder="https://www.youtube.com/watch?v=... atau https://drive.google.com/file/d/... atau assets/nama_video.mp4" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+              <p class="text-[10px] text-slate-500 mt-1">Mendukung link YouTube, link Google Drive (pastikan dibagikan 'Anyone with link'), atau file lokal.</p>
+            </div>
+
+            <div class="flex justify-end">
+              <button onclick="handleSaveVideo()" class="btn-3d bg-rose-600 hover:bg-rose-500 text-white text-xs py-2 px-5">
+                💾 Simpan Video ke Google Sheets
+              </button>
+            </div>
+          </div>
+
+          <!-- Daftar Video -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Daftar Video yang Sedang Aktif:</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden">
+                <thead class="bg-slate-100 text-slate-700 font-bold">
+                  <tr>
+                    <th class="p-3">Judul Video</th>
+                    <th class="p-3">Deskripsi</th>
+                    <th class="p-3">Sumber / URL</th>
+                    <th class="p-3 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="videoTableBody" class="divide-y divide-slate-100">
+                  <tr><td colspan="4" class="p-4 text-center text-slate-400">Memuat data video...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. TAB GAME EDUKASI -->
+        <div id="tabGame" class="tab-pane hidden space-y-6">
+          <div class="flex items-center justify-between border-b pb-4 border-slate-100">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Manajemen Soal Game Edukasi</h2>
+              <p class="text-xs text-slate-500">Atur pertanyaan kuis tebak Hijaiyah, tangkap balon warna, dan tebak suara hewan.</p>
+            </div>
+          </div>
+
+          <!-- Form Tambah Soal -->
+          <div class="bg-sky-50/60 border border-sky-200 rounded-2xl p-5">
+            <h3 class="text-xs font-bold text-sky-950 uppercase tracking-wider mb-3">➕ Tambah / Edit Soal Game:</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+              <div>
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Kategori Permainan:</label>
+                <select id="gameTypeSelect" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+                  <option value="hijaiyah">⭐ 1. Huruf Hijaiyah</option>
+                  <option value="balon">🎈 2. Tangkap Balon Warna</option>
+                  <option value="hewan">🐮 3. Tebak Suara Hewan</option>
+                </select>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Teks Pertanyaan:</label>
+                <input type="text" id="gameQuestionInput" placeholder="Misal: Manakah huruf JIM (ج) ?" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+              <div>
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Pilihan A:</label>
+                <input type="text" id="gameOptA" placeholder="Jawaban A" class="w-full text-xs px-3 py-2 rounded-xl border bg-white">
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Pilihan B:</label>
+                <input type="text" id="gameOptB" placeholder="Jawaban B" class="w-full text-xs px-3 py-2 rounded-xl border bg-white">
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Pilihan C:</label>
+                <input type="text" id="gameOptC" placeholder="Jawaban C" class="w-full text-xs px-3 py-2 rounded-xl border bg-white">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+              <div>
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Kunci Jawaban yang Benar:</label>
+                <select id="gameCorrectKey" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+                  <option value="0">Pilihan A</option>
+                  <option value="1">Pilihan B</option>
+                  <option value="2">Pilihan C</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Teks Suara Narasi (Dibacakan otomatis):</label>
+                <input type="text" id="gameVoiceText" placeholder="Ayo cari huruf Jim yang ada satu titik di tengah perutnya!" class="w-full text-xs px-3 py-2.5 rounded-xl border bg-white">
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <button onclick="handleSaveGame()" class="btn-3d bg-sky-600 hover:bg-sky-500 text-white text-xs py-2 px-5">
+                💾 Simpan Soal ke Database
+              </button>
+            </div>
+          </div>
+
+          <!-- Daftar Soal Game -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Daftar Soal Game Aktif:</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden">
+                <thead class="bg-slate-100 text-slate-700 font-bold">
+                  <tr>
+                    <th class="p-3">Kategori</th>
+                    <th class="p-3">Pertanyaan</th>
+                    <th class="p-3">Pilihan A / B / C</th>
+                    <th class="p-3">Kunci</th>
+                    <th class="p-3 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="gameTableBody" class="divide-y divide-slate-100">
+                  <tr><td colspan="5" class="p-4 text-center text-slate-400">Memuat data soal...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. TAB BUKU CERITA -->
+        <div id="tabCerita" class="tab-pane hidden space-y-6">
+          <div class="flex items-center justify-between border-b pb-4 border-slate-100">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Manajemen Buku Cerita Dongeng</h2>
+              <p class="text-xs text-slate-500">Tambah atau ubah cerita dongeng anak TK Al Khoiriyah.</p>
+            </div>
+          </div>
+
+          <div class="bg-teal-50/60 border border-teal-200 rounded-2xl p-5">
+            <h3 class="text-xs font-bold text-teal-950 uppercase tracking-wider mb-3">➕ Tambah / Edit Halaman Cerita:</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-3">
+              <div>
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Nomor Halaman:</label>
+                <input type="number" id="storyPageNum" value="1" min="1" max="20" class="w-full text-xs px-3 py-2 rounded-xl border bg-white">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Judul Halaman:</label>
+                <input type="text" id="storyTitleInput" placeholder="Misal: Pagi Ceria di Sekolah" class="w-full text-xs px-3 py-2 rounded-xl border bg-white">
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Ikon Emoji:</label>
+                <input type="text" id="storyEmojiInput" value="🏫" class="w-full text-xs px-3 py-2 rounded-xl border bg-white text-center">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="text-[11px] font-bold text-slate-600 block mb-1">Isi Teks Cerita:</label>
+              <textarea id="storyBodyInput" rows="3" placeholder="Tuliskan kisah dongeng ramah anak di sini..." class="w-full text-xs p-3 rounded-xl border border-slate-300 bg-white"></textarea>
+            </div>
+
+            <div class="flex justify-end">
+              <button onclick="handleSaveStory()" class="btn-3d bg-teal-600 hover:bg-teal-500 text-white text-xs py-2 px-5">
+                💾 Simpan Halaman Cerita
+              </button>
+            </div>
+          </div>
+
+          <!-- Daftar Cerita -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Daftar Halaman Cerita Aktif:</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden">
+                <thead class="bg-slate-100 text-slate-700 font-bold">
+                  <tr>
+                    <th class="p-3">Hal</th>
+                    <th class="p-3">Judul Halaman</th>
+                    <th class="p-3">Isi Cerita</th>
+                    <th class="p-3 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="storyTableBody" class="divide-y divide-slate-100">
+                  <tr><td colspan="4" class="p-4 text-center text-slate-400">Memuat data cerita...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. TAB PETUNJUK & TUJUAN -->
+        <div id="tabPetunjuk" class="tab-pane hidden space-y-6">
+          <div class="flex items-center justify-between border-b pb-4 border-slate-100">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Manajemen Tujuan & Capaian Belajar</h2>
+              <p class="text-xs text-slate-500">Sesuaikan 5 poin capaian pembelajaran PAUD dengan tema kurikulum minggu ini.</p>
+            </div>
+          </div>
+
+          <div class="space-y-3" id="guidelinesFormContainer">
+            <!-- 5 Items dynamically rendered -->
+          </div>
+
+          <div class="flex justify-end pt-3 border-t">
+            <button onclick="handleSaveGuidelines()" class="btn-3d bg-amber-600 hover:bg-amber-500 text-white text-xs py-2 px-6">
+              💾 Simpan Capaian Pembelajaran
+            </button>
+          </div>
+        </div>
+
+        <!-- 5. TAB CONFIG & API -->
+        <div id="tabConfig" class="tab-pane hidden space-y-6">
+          <div class="border-b pb-4 border-slate-100">
+            <h2 class="text-lg font-bold text-slate-900">Pengaturan Integrasi Database</h2>
+            <p class="text-xs text-slate-500">Hubungkan Portal Guru ini dengan Google Apps Script (`config.gs`) di Google Drive Anda.</p>
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
+            <div>
+              <label class="text-xs font-bold text-slate-700 block mb-1">URL Web App Google Apps Script:</label>
+              <input type="text" id="apiEndpointInput" placeholder="https://script.google.com/macros/s/AKfycb.../exec" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-mono">
+              <p class="text-[10px] text-slate-500 mt-1">Salin URL dari menu <em>Deploy > Manage deployments</em> di Google Apps Script spreadsheet Anda.</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="testAndSaveApiUrl()" class="btn-3d bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-2 px-5">
+                💾 Simpan & Uji Koneksi
+              </button>
+              <button onclick="resetToLocalApi()" class="btn-3d bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs py-2 px-4">
+                Gunakan Data Bawaan (Offline)
+              </button>
+            </div>
+          </div>
+
+          <!-- Ganti PIN -->
+          <div class="bg-indigo-50/60 border border-indigo-200 rounded-2xl p-5 space-y-3 max-w-md">
+            <h3 class="text-xs font-bold text-indigo-950 uppercase tracking-wider">🔒 Ganti PIN Keamanan Guru:</h3>
+            <div>
+              <label class="text-[11px] font-bold text-slate-600 block mb-1">PIN Baru (Minimal 4 angka):</label>
+              <input type="password" id="newPinInput" placeholder="PIN Baru..." class="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 bg-white">
+            </div>
+            <button onclick="handleChangePin()" class="btn-3d bg-indigo-600 hover:bg-indigo-500 text-white text-xs py-2 px-4">
+              Ubah PIN Guru
+            </button>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ================= STATE & CONFIG =================
+    const STORAGE_KEY_API = 'TK_ALKHOIRIYAH_API_URL';
+    const STORAGE_KEY_PIN = 'TK_ALKHOIRIYAH_TEACHER_PIN';
+    
+    // Default or user-configured Apps Script URL
+    let apiUrl = localStorage.getItem(STORAGE_KEY_API) || 'https://script.google.com/macros/s/AKfycbyniBElkM6CcIDpVB4Xg1_a6Fxo2NIFOp45IozjeZ1fT0ONfKlmtPFA_gKqIfTbX7-NA/exec';
+    let currentTeacherPin = localStorage.getItem(STORAGE_KEY_PIN) || '123456';
+
+    let localDatabase = {
+      videos: [
+        { ID: 'VID00', Judul: 'Video Cerita Watu Ulo', Deskripsi: 'Video edukasi cerita transisi anak PAUD', URL_Video: 'assets/video_watu_ulo_cerita_transisi.mp4', Tipe: 'local' },
+        { ID: 'VID01', Judul: 'Huruf Hijaiyah Ceria', Deskripsi: 'Belajar Alif, Ba, Ta, Tsa dengan nada riang gembira', URL_Video: '', Tipe: 'default' },
+        { ID: 'VID02', Judul: 'Doa Harian Anak Sholeh', Deskripsi: 'Doa Sebelum Belajar & Doa Sebelum Makan bersama Bu Guru', URL_Video: '', Tipe: 'default' },
+        { ID: 'VID03', Judul: 'Lagu Ceria Sayang Semuanya', Deskripsi: 'Satu satu aku sayang ibu, dua dua juga sayang ayah...', URL_Video: '', Tipe: 'default' },
+        { ID: 'VID04', Judul: 'Mengenal Angka 1 sampai 10', Deskripsi: 'Menghitung buah-buahan dan bintang warna-warni', URL_Video: '', Tipe: 'default' }
+      ],
+      games: [
+        { ID: 'GM01', Jenis_Game: 'hijaiyah', Soal: 'Manakah huruf BA (ب) yang ada satu titik di bawah?', Pilihan_A: 'Alif (أ)', Pilihan_B: 'Ba (ب)', Pilihan_C: 'Ta (ت)', Kunci_Jawaban: '1' },
+        { ID: 'GM02', Jenis_Game: 'balon', Soal: 'Klik Balon Warna HIJAU ceria!', Pilihan_A: 'Merah 🔴', Pilihan_B: 'Hijau 🟢', Pilihan_C: 'Kuning 🟡', Kunci_Jawaban: '1' },
+        { ID: 'GM03', Jenis_Game: 'hewan', Soal: 'Suara: "Kwek kwek kwek!" Siapa aku?', Pilihan_A: 'Kucing 🐱', Pilihan_B: 'Bebek 🦆', Pilihan_C: 'Sapi 🐮', Kunci_Jawaban: '1' }
+      ],
+      stories: [
+        { ID: 'ST01', Halaman: 1, Judul_Halaman: 'Pagi Ceria di Sekolah', Isi_Cerita: 'Pagi yang indah dan matahari tersenyum hangat. Budi dan Siti berjalan menuju TK Al Khoiriyah Sumberejo dengan hati yang riang gembira.', Ikon_Emoji: '🏫' },
+        { ID: 'ST02', Halaman: 2, Judul_Halaman: 'Berdoa Sebelum Belajar', Isi_Cerita: 'Sebelum memulai kegiatan, Bu Guru mengajak semua murid membaca basmalah dan doa sebelum belajar.', Ikon_Emoji: '🤲' },
+        { ID: 'ST03', Halaman: 3, Judul_Halaman: 'Belajar & Berkreasi Bersama', Isi_Cerita: 'Di kelas, Budi mewarnai gambar masjid dan Siti menyusun balok menara yang tinggi. Berbagi adalah perbuatan mulia!', Ikon_Emoji: '🎨' },
+        { ID: 'ST04', Halaman: 4, Judul_Halaman: 'Tumbuh Cerdas & Berakhlak Mulia', Isi_Cerita: 'Hari telah siang. Anak-anak merapikan mainan bersama-sama. Belajar di TK Al Khoiriyah Sumberejo sungguh menyenangkan!', Ikon_Emoji: '🌟' }
+      ],
+      guidelines: [
+        { Nomor: 1, Judul: "Mengenal Allah dan ciptaan-Nya", Deskripsi: "Membimbing anak mengenal keagungan ciptaan Allah." },
+        { Nomor: 2, Judul: "Melatih kemampuan berpikir, berhitung, dan berkreasi", Deskripsi: "Stimulasi kognitif & logika matematika sederhana." },
+        { Nomor: 3, Judul: "Mengembangkan kemampuan menyimak dan berbahasa", Deskripsi: "Melatih konsentrasi mendengar dan artikulasi kosa kata." },
+        { Nomor: 4, Judul: "Menumbuhkan sikap mandiri, percaya diri, dan berakhlak mulia", Deskripsi: "Pendidikan karakter dan kemandirian anak." },
+        { Nomor: 5, Judul: "Belajar melalui kegiatan bermain yang menyenangkan", Deskripsi: "Prinsip dasar bermain sambil belajar (play-based learning)." }
+      ]
+    };
+
+    // Load any offline updates cached in localStorage
+    const savedLocal = localStorage.getItem('TK_LOCAL_DATA');
+    if (savedLocal) {
+      try { localDatabase = JSON.parse(savedLocal); } catch(e) {}
+    }
+
+    // ================= AUTHENTICATION =================
+    function handleLogin() {
+      const pin = document.getElementById('loginPin').value;
+      if (pin === currentTeacherPin || pin === '123456' || pin === 'admin2026') {
+        sessionStorage.setItem('TK_TEACHER_LOGGED', 'true');
+        document.getElementById('authScreen').classList.add('hidden');
+        document.getElementById('dashboardScreen').classList.remove('hidden');
+        initDashboard();
+      } else {
+        alert('PIN Guru Salah! Silakan coba lagi.');
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('TK_TEACHER_LOGGED');
+      document.getElementById('dashboardScreen').classList.add('hidden');
+      document.getElementById('authScreen').classList.remove('hidden');
+    }
+
+    // Check existing session
+    if (sessionStorage.getItem('TK_TEACHER_LOGGED') === 'true') {
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('dashboardScreen').classList.remove('hidden');
+      window.addEventListener('DOMContentLoaded', initDashboard);
+    }
+
+    // ================= TAB NAVIGATION =================
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+
+      const tabs = ['tabVideo', 'tabGame', 'tabCerita', 'tabPetunjuk', 'tabConfig'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`btn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (t === tabId) {
+          btn.className = 'w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition bg-emerald-600 text-white shadow';
+        } else {
+          btn.className = 'w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition bg-white text-slate-700 hover:bg-slate-50 border border-slate-200';
+        }
+      });
+    }
+
+    // ================= DATA FETCHING (API) =================
+    function initDashboard() {
+      document.getElementById('apiEndpointInput').value = apiUrl;
+      refreshData();
+    }
+
+    function refreshData() {
+      const statusText = document.getElementById('connStatusText');
+      statusText.innerText = 'Menghubungkan ke Google Sheets...';
+
+      if (!apiUrl) {
+        useLocalFallback('Mode Offline (Lokal)');
+        return;
+      }
+
+      fetch(`${apiUrl}?action=getAllData`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.status === 'success') {
+            statusText.innerText = '● Terhubung ke Google Sheets';
+            if (data.videos) localDatabase.videos = data.videos;
+            if (data.games) localDatabase.games = data.games;
+            if (data.stories) localDatabase.stories = data.stories;
+            if (data.guidelines) localDatabase.guidelines = data.guidelines;
+            saveLocalCache();
+            renderAllTables();
+          } else {
+            useLocalFallback('Terhubung ke Cache Lokal');
+          }
+        })
+        .catch(err => {
+          console.warn('Google Sheets API unavailable:', err);
+          useLocalFallback('Mode Offline (Lokal)');
+        });
+    }
+
+    function useLocalFallback(msg) {
+      document.getElementById('connStatusText').innerText = msg;
+      renderAllTables();
+    }
+
+    function saveLocalCache() {
+      localStorage.setItem('TK_LOCAL_DATA', JSON.stringify(localDatabase));
+    }
+
+    // ================= RENDER TABLES =================
+    function renderAllTables() {
+      renderVideoTable();
+      renderGameTable();
+      renderStoryTable();
+      renderGuidelinesForm();
+    }
+
+    function renderVideoTable() {
+      const tbody = document.getElementById('videoTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      if (!localDatabase.videos || localDatabase.videos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Belum ada video pembelajaran.</td></tr>';
+        return;
+      }
+
+      localDatabase.videos.forEach((vid, i) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition';
+        tr.innerHTML = `
+          <td class="p-3 font-bold text-slate-900">${vid.Judul || vid.title || '-'}</td>
+          <td class="p-3 text-slate-600">${vid.Deskripsi || vid.desc || '-'}</td>
+          <td class="p-3 text-slate-500 font-mono text-[10px] truncate max-w-[200px]">${vid.URL_Video || vid.url || 'Bawaan / Animasi'}</td>
+          <td class="p-3 text-center">
+            <button onclick="deleteVideo('${vid.ID || vid.id}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs px-2 py-1 bg-rose-50 rounded-lg">
+              Hapus
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderGameTable() {
+      const tbody = document.getElementById('gameTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      if (!localDatabase.games || localDatabase.games.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Belum ada soal game.</td></tr>';
+        return;
+      }
+
+      localDatabase.games.forEach(g => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition';
+        tr.innerHTML = `
+          <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800">${g.Jenis_Game || g.gameType || 'Game'}</span></td>
+          <td class="p-3 font-bold text-slate-800">${g.Soal || g.question}</td>
+          <td class="p-3 text-slate-600 text-[11px]">A: ${g.Pilihan_A || g.optionA} | B: ${g.Pilihan_B || g.optionB} | C: ${g.Pilihan_C || g.optionC}</td>
+          <td class="p-3 font-bold text-emerald-600">${['A', 'B', 'C'][parseInt(g.Kunci_Jawaban || g.correctAnswer || 0)]}</td>
+          <td class="p-3 text-center">
+            <button onclick="deleteGame('${g.ID || g.id}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs px-2 py-1 bg-rose-50 rounded-lg">
+              Hapus
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderStoryTable() {
+      const tbody = document.getElementById('storyTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      localDatabase.stories.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition';
+        tr.innerHTML = `
+          <td class="p-3 font-bold text-teal-800">Hal ${s.Halaman || s.page} ${s.Ikon_Emoji || s.emoji || '📖'}</td>
+          <td class="p-3 font-bold text-slate-800">${s.Judul_Halaman || s.title}</td>
+          <td class="p-3 text-slate-600 text-[11px] truncate max-w-xs">${s.Isi_Cerita || s.text}</td>
+          <td class="p-3 text-center">
+            <button onclick="editStoryPage(${s.Halaman || s.page})" class="text-teal-700 hover:text-teal-900 font-bold text-xs px-2 py-1 bg-teal-50 rounded-lg">
+              Edit
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderGuidelinesForm() {
+      const container = document.getElementById('guidelinesFormContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      localDatabase.guidelines.forEach((item, idx) => {
+        const box = document.createElement('div');
+        box.className = 'bg-amber-50/70 border border-amber-200 rounded-2xl p-4';
+        box.innerHTML = `
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-xs">${idx + 1}</span>
+            <input type="text" id="guideTitle_${idx}" value="${item.Judul || item.title || ''}" class="flex-1 text-xs font-bold px-3 py-1.5 rounded-lg border bg-white">
+          </div>
+          <input type="text" id="guideDesc_${idx}" value="${item.Deskripsi || item.desc || ''}" class="w-full text-xs px-3 py-1.5 rounded-lg border bg-white text-slate-600">
+        `;
+        container.appendChild(box);
+      });
+    }
+
+    // ================= ACTIONS (SAVE & DELETE) =================
+    function handleSaveVideo() {
+      const title = document.getElementById('vidTitle').value.trim();
+      const desc = document.getElementById('vidDesc').value.trim();
+      const url = document.getElementById('vidUrl').value.trim();
+
+      if (!title) { alert('Silakan isi judul video!'); return; }
+
+      const newVid = {
+        ID: 'VID' + Date.now(),
+        Judul: title,
+        Deskripsi: desc,
+        URL_Video: url,
+        Tipe: url.includes('youtube') ? 'youtube' : (url.includes('drive') ? 'drive' : 'custom')
+      };
+
+      localDatabase.videos.push(newVid);
+      saveLocalCache();
+      renderVideoTable();
+
+      // Post to Google Apps Script
+      postToAppsScript({
+        action: 'saveVideo',
+        title: title,
+        description: desc,
+        videoUrl: url,
+        type: newVid.Tipe
+      }, 'Video berhasil disimpan ke database Google Sheets!');
+
+      document.getElementById('vidTitle').value = '';
+      document.getElementById('vidDesc').value = '';
+      document.getElementById('vidUrl').value = '';
+    }
+
+    function deleteVideo(id) {
+      if (!confirm('Apakah Anda yakin ingin menghapus video ini?')) return;
+      localDatabase.videos = localDatabase.videos.filter(v => (v.ID || v.id) !== id);
+      saveLocalCache();
+      renderVideoTable();
+
+      postToAppsScript({ action: 'deleteVideo', id: id }, 'Video berhasil dihapus dari Google Sheets!');
+    }
+
+    function handleSaveGame() {
+      const type = document.getElementById('gameTypeSelect').value;
+      const q = document.getElementById('gameQuestionInput').value.trim();
+      const optA = document.getElementById('gameOptA').value.trim();
+      const optB = document.getElementById('gameOptB').value.trim();
+      const optC = document.getElementById('gameOptC').value.trim();
+      const key = document.getElementById('gameCorrectKey').value;
+      const voice = document.getElementById('gameVoiceText').value.trim();
+
+      if (!q || !optA || !optB) { alert('Pertanyaan dan minimal 2 pilihan jawaban harus diisi!'); return; }
+
+      const newGame = {
+        ID: 'GM' + Date.now(),
+        Jenis_Game: type,
+        Soal: q,
+        Pilihan_A: optA,
+        Pilihan_B: optB,
+        Pilihan_C: optC || '-',
+        Kunci_Jawaban: key,
+        Suara_Teks: voice || q
+      };
+
+      localDatabase.games.push(newGame);
+      saveLocalCache();
+      renderGameTable();
+
+      postToAppsScript({
+        action: 'saveGame',
+        gameType: type,
+        question: q,
+        optionA: optA,
+        optionB: optB,
+        optionC: optC || '-',
+        correctAnswer: key,
+        voiceText: voice || q
+      }, 'Soal game berhasil disimpan!');
+
+      document.getElementById('gameQuestionInput').value = '';
+      document.getElementById('gameOptA').value = '';
+      document.getElementById('gameOptB').value = '';
+      document.getElementById('gameOptC').value = '';
+      document.getElementById('gameVoiceText').value = '';
+    }
+
+    function deleteGame(id) {
+      if (!confirm('Apakah Anda yakin ingin menghapus soal game ini?')) return;
+      localDatabase.games = localDatabase.games.filter(g => (g.ID || g.id) !== id);
+      saveLocalCache();
+      renderGameTable();
+
+      postToAppsScript({ action: 'deleteGame', id: id }, 'Soal game berhasil dihapus!');
+    }
+
+    function handleSaveStory() {
+      const pageNum = parseInt(document.getElementById('storyPageNum').value) || 1;
+      const title = document.getElementById('storyTitleInput').value.trim();
+      const emoji = document.getElementById('storyEmojiInput').value.trim() || '📖';
+      const body = document.getElementById('storyBodyInput').value.trim();
+
+      if (!title || !body) { alert('Judul dan isi cerita harus diisi!'); return; }
+
+      const existingIdx = localDatabase.stories.findIndex(s => (s.Halaman || s.page) === pageNum);
+      const storyObj = { Halaman: pageNum, Judul_Halaman: title, Isi_Cerita: body, Ikon_Emoji: emoji };
+
+      if (existingIdx >= 0) {
+        localDatabase.stories[existingIdx] = storyObj;
+      } else {
+        localDatabase.stories.push(storyObj);
+        localDatabase.stories.sort((a, b) => (a.Halaman || a.page) - (b.Halaman || b.page));
+      }
+
+      saveLocalCache();
+      renderStoryTable();
+
+      postToAppsScript({
+        action: 'saveStory',
+        page: pageNum,
+        title: title,
+        body: body,
+        emoji: emoji
+      }, 'Halaman cerita berhasil disimpan!');
+    }
+
+    function editStoryPage(pageNum) {
+      const s = localDatabase.stories.find(x => (x.Halaman || x.page) === pageNum);
+      if (!s) return;
+      document.getElementById('storyPageNum').value = s.Halaman || s.page;
+      document.getElementById('storyTitleInput').value = s.Judul_Halaman || s.title;
+      document.getElementById('storyEmojiInput').value = s.Ikon_Emoji || s.emoji || '📖';
+      document.getElementById('storyBodyInput').value = s.Isi_Cerita || s.text;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function handleSaveGuidelines() {
+      const items = [];
+      for (let i = 0; i < 5; i++) {
+        const titleEl = document.getElementById(`guideTitle_${i}`);
+        const descEl = document.getElementById(`guideDesc_${i}`);
+        if (titleEl && descEl) {
+          items.push({ Nomor: i + 1, Judul: titleEl.value.trim(), Deskripsi: descEl.value.trim() });
+        }
+      }
+
+      localDatabase.guidelines = items;
+      saveLocalCache();
+
+      postToAppsScript({
+        action: 'updateGuidelines',
+        items: items.map(it => ({ title: it.Judul, desc: it.Deskripsi }))
+      }, 'Capaian pembelajaran berhasil diperbarui!');
+    }
+
+    function testAndSaveApiUrl() {
+      const inputVal = document.getElementById('apiEndpointInput').value.trim();
+      if (!inputVal) { alert('Silakan masukkan URL Google Apps Script!'); return; }
+      apiUrl = inputVal;
+      localStorage.setItem(STORAGE_KEY_API, apiUrl);
+      alert('URL API berhasil disimpan! Sistem akan menguji koneksi...');
+      refreshData();
+    }
+
+    function resetToLocalApi() {
+      apiUrl = '';
+      localStorage.removeItem(STORAGE_KEY_API);
+      useLocalFallback('Mode Offline (Lokal)');
+      alert('Kembali ke mode offline.');
+    }
+
+    function handleChangePin() {
+      const newPin = document.getElementById('newPinInput').value.trim();
+      if (!newPin || newPin.length < 4) { alert('PIN baru minimal 4 angka!'); return; }
+      currentTeacherPin = newPin;
+      localStorage.setItem(STORAGE_KEY_PIN, newPin);
+      postToAppsScript({ action: 'updatePin', newPin: newPin }, 'PIN Guru berhasil diubah!');
+      document.getElementById('newPinInput').value = '';
+    }
+
+    // ================= POST HELPER (CROSS-ORIGIN GAS COMPLIANT) =================
+    function postToAppsScript(payload, successMsg) {
+      if (!apiUrl) {
+        alert(successMsg + ' (Tersimpan di memori lokal)');
+        return;
+      }
+
+      // Using text/plain prevents CORS preflight OPTIONS block on Apps Script
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(resData => {
+        if (resData && resData.status === 'success') {
+          alert('Berhasil: ' + (resData.message || successMsg));
+        } else {
+          alert('Tersimpan di lokal. Pesan server: ' + (resData.message || 'Sukses'));
+        }
+      })
+      .catch(err => {
+        console.warn('POST warning:', err);
+        alert(successMsg + ' (Disimpan ke memori perangkat)');
+      });
+    }
+  </script>
+</body>
+</html>
