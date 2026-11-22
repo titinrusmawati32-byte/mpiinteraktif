@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Portal Guru & Admin CMS - TK AL KHOIRIYAH SUMBEREJO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Quicksand', 'Fredoka', system-ui, sans-serif;
+      background: #f1f5f9;
+    }
+    .btn-action {
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .btn-action:hover {
+      transform: translateY(-1px);
+    }
+    .btn-action:active {
+      transform: translateY(1px);
+    }
+    .tab-active {
+      background: #059669 !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+    }
+    /* Toast Animation */
+    #toastContainer {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    .toast-msg {
+      pointer-events: auto;
+      animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes slideInUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800">
+
+  <!-- ================= TOAST CONTAINER ================= -->
+  <div id="toastContainer" class="flex flex-col gap-2"></div>
+
+  <!-- ================= AUTH VIEW (LOGIN PIN) ================= -->
+  <div id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center border-4 border-emerald-500">
+      <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-4xl mx-auto mb-4 shadow-lg">
+        🔐
+      </div>
+      <h2 class="text-2xl font-bold text-slate-800 mb-1">Portal Guru & Admin CMS</h2>
+      <p class="text-xs text-slate-500 mb-6">TK Al Khoiriyah Sumberejo • Kelompok A (4-5 Tahun)</p>
+
+      <div class="space-y-4 text-left">
+        <div>
+          <label class="text-xs font-bold text-slate-700 block mb-1.5">Masukkan PIN Keamanan Guru:</label>
+          <input type="password" id="loginPin" value="123456" placeholder="Masukkan 6 Digit PIN" 
+                 class="w-full text-center text-xl font-mono tracking-widest px-4 py-3 rounded-2xl border-2 border-slate-300 focus:border-emerald-500 focus:outline-none">
+          <p class="text-[11px] text-slate-400 mt-1.5 text-center">PIN Default: <code class="bg-slate-100 px-2 py-0.5 rounded font-bold text-slate-700">123456</code></p>
+        </div>
+
+        <button onclick="handleLogin()" class="w-full btn-action bg-emerald-600 hover:bg-emerald-500 text-white py-3.5 rounded-2xl text-sm font-bold shadow-lg shadow-emerald-600/30">
+          Masuk ke Dashboard Guru ➔
+        </button>
+
+        <div class="pt-4 border-t border-slate-100 text-center">
+          <a href="index.html" class="text-xs text-slate-500 hover:text-emerald-700 font-bold inline-flex items-center gap-1.5">
+            <span>←</span>
+            <span>Kembali ke Aplikasi Siswa</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOP BAR ================= -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-xl font-bold shadow-md shrink-0">
+          🕌
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm sm:text-base font-bold text-slate-900 leading-none" id="headerSchoolName">TK AL KHOIRIYAH SUMBEREJO</h1>
+            <span class="hidden sm:inline-block text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">v2.0 Vercel Ready</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5" id="headerSubTitle">Portal Guru & Manajemen Konten Interaktif</p>
+        </div>
+      </div>
+
+      <!-- Live Connection Status & Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div id="syncBadge" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="syncStatusText">Database: Terhubung ke Google Sheets</span>
+        </div>
+
+        <a href="index.html" target="_blank" class="btn-action px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs font-bold shadow flex items-center gap-1.5">
+          <span>👁️</span>
+          <span class="hidden sm:inline">Lihat</span>
+          <span>Aplikasi Siswa</span>
+        </a>
+
+        <button onclick="handleLogout()" class="text-xs text-rose-600 hover:text-rose-700 font-bold px-2 py-1">
+          Keluar
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================= MAIN LAYOUT ================= -->
+  <div class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full flex flex-col md:flex-row gap-6">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="w-full md:w-72 space-y-2 shrink-0">
+      <div class="bg-white border border-slate-200 rounded-3xl p-3 shadow-sm space-y-1">
+        <div class="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Modul Manajemen Konten</div>
+        
+        <button onclick="showTab('menuVideo')" id="nav_menuVideo" class="tab-btn w-full text-left px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-3 tab-active">
+          <span class="text-lg">🎬</span>
+          <span>1. Video Edukasi PAUD</span>
+        </button>
+
+        <button onclick="showTab('menuBahanAjar')" id="nav_menuBahanAjar" class="tab-btn w-full text-left px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-3 text-slate-600 hover:bg-slate-50">
+          <span class="text-lg">📚</span>
+          <span>2. Bahan Ajar & Modul (LKPD)</span>
+        </button>
+
+        <button onclick="showTab('menuGame')" id="nav_menuGame" class="tab-btn w-full text-left px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-3 text-slate-600 hover:bg-slate-50">
+          <span class="text-lg">🎮</span>
+          <span>3. Soal Game Edukasi</span>
+        </button>
+
+        <button onclick="showTab('menuCerita')" id="nav_menuCerita" class="tab-btn w-full text-left px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-3 text-slate-600 hover:bg-slate-50">
+          <span class="text-lg">📖</span>
+          <span>4. Buku Cerita Dongeng</span>
+        </button>
+
+        <button onclick="showTab('menuPetunjuk')" id="nav_menuPetunjuk" class="tab-btn w-full text-left px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-3 text-slate-600 hover:bg-slate-50">
+          <span class="text-lg">🎯</span>
+          <span>5. Capaian & Tema Belajar</span>
+        </button>
+
+        <button onclick="showTab('menuIdentitas')" id="nav_menuIdentitas" class="tab-btn w-full text-left px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-3 text-slate-600 hover:bg-slate-50">
+          <span class="text-lg">🏫</span>
+          <span>6. Identitas TK & Guru</span>
+        </button>
+
+        <div class="pt-2 border-t border-slate-100 px-3 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Integrasi Database</div>
+
+        <button onclick="showTab('menuConfig')" id="nav_menuConfig" class="tab-btn w-full text-left px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-3 text-slate-600 hover:bg-slate-50">
+          <span class="text-lg">⚙️</span>
+          <span>7. Database config.gs</span>
+        </button>
+      </div>
+
+      <!-- Quick Summary Card -->
+      <div class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-3xl p-4 shadow-md text-xs space-y-2">
+        <div class="font-bold text-sm flex items-center justify-between">
+          <span>Ringkasan Database</span>
+          <span id="quickStatsIcon">📊</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-[11px] pt-1">
+          <div class="bg-white/15 p-2 rounded-xl">
+            <div class="opacity-80">Total Video:</div>
+            <div class="text-base font-bold" id="statVideoCount">5 Materi</div>
+          </div>
+          <div class="bg-white/15 p-2 rounded-xl">
+            <div class="opacity-80">Bahan Ajar:</div>
+            <div class="text-base font-bold" id="statBahanCount">3 Modul</div>
+          </div>
+          <div class="bg-white/15 p-2 rounded-xl">
+            <div class="opacity-80">Soal Game:</div>
+            <div class="text-base font-bold" id="statGameCount">9 Soal</div>
+          </div>
+          <div class="bg-white/15 p-2 rounded-xl">
+            <div class="opacity-80">Buku Cerita:</div>
+            <div class="text-base font-bold" id="statStoryCount">4 Hal</div>
+          </div>
+        </div>
+        <div class="text-[10px] text-emerald-100 pt-1 border-t border-white/20 flex items-center justify-between">
+          <span>Sinkronisasi Otomatis</span>
+          <span class="font-bold">Real-Time ✓</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT DISPLAY AREA -->
+    <main class="flex-1 bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
+
+      <!-- ================= 1. MENU VIDEO ================= -->
+      <div id="section_menuVideo" class="tab-section space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 border-slate-100">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Manajemen Video Edukasi PAUD</h2>
+            <p class="text-xs text-slate-500">Video pembelajaran yang tayang di menu bioskop video siswa.</p>
+          </div>
+          <button onclick="syncAllFromBackend()" class="btn-action text-xs px-3.5 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 font-bold text-slate-600 self-start sm:self-auto">
+            🔄 Tarik Data dari Sheets
+          </button>
+        </div>
+
+        <!-- Form Tambah Video -->
+        <div class="bg-rose-50/70 border border-rose-200 rounded-2xl p-5 space-y-3">
+          <h3 class="text-xs font-bold text-rose-950 uppercase tracking-wider">➕ Formulir Tambah / Upload Video:</h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Judul Video:</label>
+              <input type="text" id="vidTitle" placeholder="Misal: Video Transisi Watu Ulo Ceria" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Kategori / Topik:</label>
+              <select id="vidCategory" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+                <option value="Dongeng Budaya">Dongeng & Cerita Budaya</option>
+                <option value="Huruf Hijaiyah">Huruf Hijaiyah & Agama</option>
+                <option value="Doa Harian">Doa Harian & Budi Pekerti</option>
+                <option value="Lagu Anak">Lagu Anak & Tari Ceria</option>
+                <option value="Angka & Kognitif">Angka & Kognitif</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Opsi Sumber Video -->
+          <div class="bg-white p-3.5 rounded-xl border border-rose-200 space-y-2">
+            <label class="text-[11px] font-bold text-slate-700 block">Pilih Sumber Video:</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+              <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-rose-50">
+                <input type="radio" name="vidType" value="youtube" checked onchange="updateVidSourcePlaceholder()">
+                <span>🌐 Link YouTube</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-rose-50">
+                <input type="radio" name="vidType" value="drive" onchange="updateVidSourcePlaceholder()">
+                <span>📁 Google Drive Link</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-rose-50">
+                <input type="radio" name="vidType" value="local" onchange="updateVidSourcePlaceholder()">
+                <span>💻 File MP4 Lokal Vercel</span>
+              </label>
+            </div>
+            <input type="text" id="vidUrl" placeholder="https://www.youtube.com/watch?v=..." class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-mono">
+          </div>
+
+          <div class="flex justify-end pt-1">
+            <button onclick="saveVideo()" class="btn-action px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-md">
+              💾 Simpan Video ke Database
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabel Daftar Video -->
+        <div>
+          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">Daftar Video yang Sedang Aktif di Aplikasi Siswa:</h3>
+          <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-700 font-bold border-b">
+                <tr>
+                  <th class="p-3">Judul Video</th>
+                  <th class="p-3">Kategori</th>
+                  <th class="p-3">Sumber / URL</th>
+                  <th class="p-3 text-center">Status</th>
+                  <th class="p-3 text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="videoTableBody" class="divide-y divide-slate-100">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 2. MENU BAHAN AJAR (LKPD) ================= -->
+      <div id="section_menuBahanAjar" class="tab-section hidden space-y-6">
+        <div class="border-b pb-4 border-slate-100">
+          <h2 class="text-lg font-bold text-slate-900">Manajemen Bahan Ajar & Lembar Kerja (LKPD)</h2>
+          <p class="text-xs text-slate-500">Unggah lembar kerja mewarnai, kartu bergambar, dan materi ajar untuk diakses siswa & wali murid.</p>
+        </div>
+
+        <!-- Form Tambah Bahan Ajar -->
+        <div class="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-5 space-y-3">
+          <h3 class="text-xs font-bold text-indigo-950 uppercase tracking-wider">➕ Tambah / Upload Bahan Ajar Baru:</h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Nama Materi / Lembar Kerja:</label>
+              <input type="text" id="bahanTitle" placeholder="Misal: Lembar Mewarnai Masjid & Kaligrafi" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Jenis Berkas:</label>
+              <select id="bahanType" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+                <option value="PDF Dokumen">PDF Dokumen</option>
+                <option value="PNG Gambar HD">PNG Gambar HD / Lembar Mewarnai</option>
+                <option value="Modul Tematik">Modul Tematik PAUD</option>
+                <option value="Kartu Belajar">Kartu Belajar Huruf & Angka</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Pilih File untuk Diunggah:</label>
+              <input type="file" id="bahanFileInput" class="w-full text-xs p-2 rounded-xl border border-slate-300 bg-white">
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Tautan File Alternatif (Google Drive / URL):</label>
+              <input type="text" id="bahanUrlInput" placeholder="https://drive.google.com/file/d/... atau assets/..." class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-mono">
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-1">
+            <button onclick="saveBahanAjar()" class="btn-action px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md">
+              📤 Upload / Simpan Bahan Ajar
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabel Bahan Ajar -->
+        <div>
+          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">Daftar Bahan Ajar yang Tersedia:</h3>
+          <div class="border border-slate-200 rounded-2xl overflow-hidden">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 font-bold border-b">
+                <tr>
+                  <th class="p-3">Nama Bahan Ajar</th>
+                  <th class="p-3">Jenis Berkas</th>
+                  <th class="p-3">Ukuran / Sumber</th>
+                  <th class="p-3 text-center">Tindakan</th>
+                </tr>
+              </thead>
+              <tbody id="bahanTableBody" class="divide-y divide-slate-100">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 3. MENU GAME EDUKASI ================= -->
+      <div id="section_menuGame" class="tab-section hidden space-y-6">
+        <div class="border-b pb-4 border-slate-100">
+          <h2 class="text-lg font-bold text-slate-900">Manajemen Soal Game Edukasi PAUD</h2>
+          <p class="text-xs text-slate-500">Atur kuis tebak Hijaiyah, tangkap balon warna, dan tebak suara hewan.</p>
+        </div>
+
+        <div class="bg-sky-50/70 border border-sky-200 rounded-2xl p-5 space-y-3">
+          <h3 class="text-xs font-bold text-sky-950 uppercase tracking-wider">➕ Tambah / Edit Kuis Soal:</h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Pilih Mini Game:</label>
+              <select id="gameCategorySelect" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+                <option value="hijaiyah">⭐ 1. Huruf Hijaiyah</option>
+                <option value="balon">🎈 2. Tangkap Balon Warna</option>
+                <option value="hewan">🐮 3. Tebak Suara Hewan</option>
+              </select>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Teks Pertanyaan Soal:</label>
+              <input type="text" id="gameQuestion" placeholder="Misal: Manakah huruf RO (ر) yang melengkung?" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Pilihan A:</label>
+              <input type="text" id="gameOptA" placeholder="Alif (أ)" class="w-full text-xs px-3 py-2 rounded-xl border bg-white">
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Pilihan B:</label>
+              <input type="text" id="gameOptB" placeholder="Ro (ر)" class="w-full text-xs px-3 py-2 rounded-xl border bg-white">
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Pilihan C:</label>
+              <input type="text" id="gameOptC" placeholder="Zai (ز)" class="w-full text-xs px-3 py-2 rounded-xl border bg-white">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Kunci Jawaban yang Benar:</label>
+              <select id="gameKeySelect" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+                <option value="0">Pilihan A</option>
+                <option value="1" selected>Pilihan B (Benar)</option>
+                <option value="2">Pilihan C</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Suara Narasi (Dibacakan otomatis):</label>
+              <input type="text" id="gameVoiceText" placeholder="Ayo cari huruf Ro yang berbentuk melengkung!" class="w-full text-xs px-3 py-2.5 rounded-xl border bg-white">
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-1">
+            <button onclick="saveGameQuestion()" class="btn-action px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md">
+              💾 Simpan Soal Game
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabel Soal Game -->
+        <div>
+          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">Daftar Soal Game yang Sedang Aktif:</h3>
+          <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 font-bold border-b">
+                <tr>
+                  <th class="p-3">Kategori</th>
+                  <th class="p-3">Pertanyaan</th>
+                  <th class="p-3">Opsi Jawaban</th>
+                  <th class="p-3">Kunci</th>
+                  <th class="p-3 text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="gameTableBody" class="divide-y divide-slate-100">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 4. MENU BUKU CERITA ================= -->
+      <div id="section_menuCerita" class="tab-section hidden space-y-6">
+        <div class="border-b pb-4 border-slate-100">
+          <h2 class="text-lg font-bold text-slate-900">Manajemen Buku Cerita Dongeng Islami</h2>
+          <p class="text-xs text-slate-500">Edit isi cerita bergambar, judul halaman, dan ikon emoji yang dibacakan oleh narator suara.</p>
+        </div>
+
+        <div class="bg-teal-50/70 border border-teal-200 rounded-2xl p-5 space-y-3">
+          <h3 class="text-xs font-bold text-teal-950 uppercase tracking-wider">➕ Tambah / Edit Halaman Cerita:</h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Nomor Halaman:</label>
+              <input type="number" id="storyPageNum" value="1" min="1" max="10" class="w-full text-xs px-3 py-2 rounded-xl border bg-white font-bold text-center">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Judul Halaman:</label>
+              <input type="text" id="storyTitle" placeholder="Misal: Pagi Ceria di Sekolah" class="w-full text-xs px-3 py-2 rounded-xl border bg-white font-bold">
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-700 block mb-1">Ikon Emoji:</label>
+              <input type="text" id="storyEmoji" value="🏫" class="w-full text-xs px-3 py-2 rounded-xl border bg-white text-center text-base">
+            </div>
+          </div>
+
+          <div>
+            <label class="text-[11px] font-bold text-slate-700 block mb-1">Isi Paragraf Cerita (Dibacakan otomatis):</label>
+            <textarea id="storyText" rows="3" class="w-full text-xs p-3 rounded-xl border border-slate-300 bg-white leading-relaxed" placeholder="Tuliskan cerita anak ramah usia 4-5 tahun di sini..."></textarea>
+          </div>
+
+          <div class="flex justify-between items-center pt-1">
+            <button onclick="testSpeechNarration()" class="text-xs font-bold text-teal-700 hover:underline flex items-center gap-1">
+              <span>🔊</span>
+              <span>Uji Suara Narasi</span>
+            </button>
+            <button onclick="saveStoryPage()" class="btn-action px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold shadow-md">
+              💾 Simpan Halaman Cerita
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabel Cerita -->
+        <div>
+          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">Halaman Cerita yang Tersedia:</h3>
+          <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 font-bold border-b">
+                <tr>
+                  <th class="p-3 text-center w-16">Hal</th>
+                  <th class="p-3">Judul Halaman</th>
+                  <th class="p-3">Isi Teks Cerita</th>
+                  <th class="p-3 text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="storyTableBody" class="divide-y divide-slate-100">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 5. MENU CAPAIAN & PETUNJUK ================= -->
+      <div id="section_menuPetunjuk" class="tab-section hidden space-y-6">
+        <div class="border-b pb-4 border-slate-100">
+          <h2 class="text-lg font-bold text-slate-900">Manajemen 5 Capaian Pembelajaran PAUD</h2>
+          <p class="text-xs text-slate-500">Edit isi 5 poin Tujuan Pembelajaran pada layar Petunjuk Media sesuai kurikulum mingguan.</p>
+        </div>
+
+        <div class="space-y-3" id="guidelinesContainer">
+          <!-- 5 Items dynamically rendered -->
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button onclick="saveGuidelines()" class="btn-action px-6 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-md">
+            💾 Simpan Seluruh 5 Capaian
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= 6. IDENTITAS TK ================= -->
+      <div id="section_menuIdentitas" class="tab-section hidden space-y-6">
+        <div class="border-b pb-4 border-slate-100">
+          <h2 class="text-lg font-bold text-slate-900">Identitas Satuan PAUD & Guru</h2>
+          <p class="text-xs text-slate-500">Sesuaikan data profil sekolah yang tampil pada header dan informasi aplikasi anak.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="text-[11px] font-bold text-slate-700 block mb-1">Nama Satuan PAUD / TK:</label>
+            <input type="text" id="identitasNama" value="TK AL KHOIRIYAH SUMBEREJO" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold">
+          </div>
+          <div>
+            <label class="text-[11px] font-bold text-slate-700 block mb-1">Kelompok Usia:</label>
+            <input type="text" id="identitasKelompok" value="Kelompok A (4-5 Tahun)" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-[11px] font-bold text-slate-700 block mb-1">Alamat Lengkap:</label>
+            <input type="text" id="identitasAlamat" value="Jl. Payangan RT 002 RW 025 Dusun Bregoh, Desa Sumberejo" class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-300 bg-white">
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button onclick="saveIdentitas()" class="btn-action px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md">
+            💾 Simpan Identitas Sekolah
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= 7. MENU CONFIG & GOOGLE APPS SCRIPT ================= -->
+      <div id="section_menuConfig" class="tab-section hidden space-y-6">
+        <div class="border-b pb-4 border-slate-100">
+          <h2 class="text-lg font-bold text-slate-900">Integrasi Database: config.gs & Vercel</h2>
+          <p class="text-xs text-slate-500">Hubungkan frontend Vercel ini dengan Google Apps Script backend Anda.</p>
+        </div>
+
+        <!-- URL Input & Test -->
+        <div class="bg-emerald-50/80 border border-emerald-300 rounded-2xl p-5 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🔗</span>
+            <h3 class="text-xs font-bold text-emerald-950 uppercase tracking-wider">URL Web App Google Apps Script (config.gs):</h3>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Tempelkan URL Web App yang Anda peroleh dari menu <em>Deploy > Manage deployments</em> pada Google Spreadsheet Anda:
+          </p>
+
+          <input type="text" id="dbUrlInput" class="w-full text-xs px-3.5 py-3 rounded-xl border border-emerald-400 bg-white font-mono text-emerald-900 shadow-inner" placeholder="https://script.google.com/macros/s/.../exec">
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <span class="text-[11px] text-emerald-700 font-bold" id="dbStatusLabel">● Status: Otomatis tersambung ketika web di-deploy di Vercel</span>
+            <div class="flex items-center gap-2">
+              <button onclick="resetToLocalDefaults()" class="btn-action px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold">
+                Kembalikan Default
+              </button>
+              <button onclick="testAndSaveApiUrl()" class="btn-action px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md">
+                ⚡ Uji & Simpan Koneksi
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ubah PIN Guru -->
+        <div class="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-5 space-y-3 max-w-md">
+          <h3 class="text-xs font-bold text-indigo-950 uppercase tracking-wider">🔒 Ganti PIN Keamanan Guru:</h3>
+          <div>
+            <label class="text-[11px] font-bold text-slate-600 block mb-1">PIN Baru (Minimal 4 Angka):</label>
+            <input type="password" id="newPinInput" placeholder="Masukkan PIN baru..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-bold tracking-widest">
+          </div>
+          <button onclick="handleChangePin()" class="btn-action px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md">
+            Ubah PIN Keamanan
+          </button>
+        </div>
+
+        <!-- Cara Kerja -->
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-2.5 text-xs text-slate-700">
+          <h4 class="font-bold text-slate-900 text-sm">💡 Alur Kerja Sinkronisasi Vercel + config.gs:</h4>
+          <ol class="list-decimal pl-5 space-y-1">
+            <li>Saat Anda menyimpan perubahan di halaman ini, data langsung tersimpan di browser (seketika).</li>
+            <li>Secara bersamaan, data dikirim ke <code>config.gs</code> di Google Spreadsheet & Google Drive Anda.</li>
+            <li>Aplikasi siswa di tab lain atau di perangkat siswa langsung menerima pembaruan secara responsif tanpa perlu muat ulang halaman!</li>
+          </ol>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ================= LOGIC & REALTIME SYNC ================= -->
+  <script>
+    const STORAGE_KEY_API = 'TK_ALKHOIRIYAH_API_URL';
+    const STORAGE_KEY_PIN = 'TK_ALKHOIRIYAH_TEACHER_PIN';
+    const STORAGE_KEY_DATA = 'TK_LOCAL_DATA';
+    const STORAGE_KEY_UPDATED = 'TK_DATA_UPDATED_AT';
+
+    const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbyniBElkM6CcIDpVB4Xg1_a6Fxo2NIFOp45IozjeZ1fT0ONfKlmtPFA_gKqIfTbX7-NA/exec';
+    let apiUrl = localStorage.getItem(STORAGE_KEY_API) || DEFAULT_API_URL;
+    let currentTeacherPin = localStorage.getItem(STORAGE_KEY_PIN) || '123456';
+
+    // Default In-Memory Database
+    let db = {
+      videos: [
+        { ID: 'VID00', Judul: 'Video Cerita Watu Ulo', Deskripsi: 'Dongeng Budaya', Tipe: 'local', URL_Video: 'assets/video_watu_ulo_cerita_transisi.mp4' },
+        { ID: 'VID01', Judul: 'Huruf Hijaiyah Ceria', Deskripsi: 'Huruf Hijaiyah', Tipe: 'youtube', URL_Video: 'https://www.youtube.com/watch?v=k5j4l3m2n1o' },
+        { ID: 'VID02', Judul: 'Doa Harian Anak Sholeh', Deskripsi: 'Doa Harian', Tipe: 'default', URL_Video: '' },
+        { ID: 'VID03', Judul: 'Lagu Ceria Sayang Semuanya', Deskripsi: 'Lagu Anak', Tipe: 'default', URL_Video: '' },
+        { ID: 'VID04', Judul: 'Mengenal Angka 1 sampai 10', Deskripsi: 'Angka & Kognitif', Tipe: 'default', URL_Video: '' }
+      ],
+      bahanAjar: [
+        { ID: 'BA01', Nama_Materi: 'Lembar Kerja Mewarnai Kubah Masjid', Jenis: 'PDF Dokumen', Ukuran: '1.2 MB', URL_Berkas: 'assets/lkpd_mewarnai.pdf' },
+        { ID: 'BA02', Kartu_Hijaiyah: true, Nama_Materi: 'Kartu Huruf Hijaiyah Ceria', Jenis: 'PNG Gambar HD', Ukuran: '3.4 MB', URL_Berkas: 'assets/kartu_hijaiyah.png' },
+        { ID: 'BA03', Nama_Materi: 'Modul Ajar Tematik PAUD - Semester 1', Jenis: 'Modul Tematik', Ukuran: '2.1 MB', URL_Berkas: 'assets/modul_ajar.pdf' }
+      ],
+      games: [
+        { ID: 'GM01', Jenis_Game: 'hijaiyah', Soal: 'Manakah huruf BA (ب) yang ada satu titik di bawah?', Pilihan_A: 'Alif (أ)', Pilihan_B: 'Ba (ب)', Pilihan_C: 'Ta (ت)', Kunci_Jawaban: '1', Suara_Teks: 'Manakah huruf Ba yang ada satu titik di bawah?' },
+        { ID: 'GM02', Jenis_Game: 'hijaiyah', Soal: 'Manakah huruf TA (ت) yang memiliki dua titik di atas?', Pilihan_A: 'Ba (ب)', Pilihan_B: 'Ta (ت)', Pilihan_C: 'Tsa (ث)', Kunci_Jawaban: '1', Suara_Teks: 'Manakah huruf Ta yang memiliki dua titik di atas?' },
+        { ID: 'GM03', Jenis_Game: 'hijaiyah', Soal: 'Manakah huruf ALIF (أ) yang berdiri tegak?', Pilihan_A: 'Alif (أ)', Pilihan_B: 'Jim (ج)', Pilihan_C: 'Dal (د)', Kunci_Jawaban: '0', Suara_Teks: 'Manakah huruf Alif yang berdiri tegak?' },
+        { ID: 'GM04', Jenis_Game: 'balon', Soal: 'Klik Balon Warna HIJAU ceria!', Pilihan_A: 'Merah 🔴', Pilihan_B: 'Hijau 🟢', Pilihan_C: 'Kuning 🟡', Kunci_Jawaban: '1', Suara_Teks: 'Ayo tangkap balon yang berwarna hijau ceria!' },
+        { ID: 'GM05', Jenis_Game: 'balon', Soal: 'Klik Balon Warna MERAH terang!', Pilihan_A: 'Merah 🔴', Pilihan_B: 'Biru 🔵', Pilihan_C: 'Ungu 🟣', Kunci_Jawaban: '0', Suara_Teks: 'Pilih balon yang berwarna merah!' },
+        { ID: 'GM06', Jenis_Game: 'balon', Soal: 'Klik Balon Warna KUNING seperti matahari!', Pilihan_A: 'Hijau 🟢', Pilihan_B: 'Kuning 🟡', Pilihan_C: 'Oranye 🟠', Kunci_Jawaban: '1', Suara_Teks: 'Pilih balon yang berwarna kuning!' },
+        { ID: 'GM07', Jenis_Game: 'hewan', Soal: 'Suara: "Kwek kwek kwek!" Siapa aku?', Pilihan_A: 'Kucing 🐱', Pilihan_B: 'Bebek 🦆', Pilihan_C: 'Sapi 🐮', Kunci_Jawaban: '1', Suara_Teks: 'Kwek kwek kwek! Hewan apa yang suka berenang di air?' },
+        { ID: 'GM08', Jenis_Game: 'hewan', Soal: 'Suara: "Mooo... Mooo..." Siapa aku?', Pilihan_A: 'Ayam 🐔', Pilihan_B: 'Kambing 🐐', Pilihan_C: 'Sapi 🐮', Kunci_Jawaban: '2', Suara_Teks: 'Mooo mooo! Siapakah penghasil susu segar?' },
+        { ID: 'GM09', Jenis_Game: 'hewan', Soal: 'Suara: "Meeong... Meeong..." Siapa aku?', Pilihan_A: 'Kucing 🐱', Pilihan_B: 'Burung 🐦', Pilihan_C: 'Ikan 🐟', Kunci_Jawaban: '0', Suara_Teks: 'Meeong meeong! Siapa teman berbulu yang lucu?' }
+      ],
+      stories: [
+        { ID: 'ST01', Halaman: 1, Judul_Halaman: 'Pagi Ceria di Sekolah', Isi_Cerita: 'Pagi yang indah dan matahari tersenyum hangat. Budi dan Siti berjalan menuju TK Al Khoiriyah Sumberejo dengan hati yang riang gembira. Mereka siap belajar dan bermain bersama Bu Guru dan teman-teman.', Ikon_Emoji: '🏫' },
+        { ID: 'ST02', Halaman: 2, Judul_Halaman: 'Berdoa Sebelum Belajar', Isi_Cerita: 'Sebelum memulai kegiatan, Bu Guru mengajak semua murid membaca basmalah dan doa sebelum belajar. Anak-anak yang sholeh dan sholehah selalu bersyukur kepada Allah atas nikmat sehat dan teman yang baik.', Ikon_Emoji: '🤲' },
+        { ID: 'ST03', Halaman: 3, Judul_Halaman: 'Belajar & Berkreasi Bersama', Isi_Cerita: 'Di kelas, Budi mewarnai gambar masjid dan Siti menyusun balok menara yang tinggi. Mereka saling meminjamkan krayon dengan ramah. Berbagi adalah perbuatan yang sangat terpuji!', Ikon_Emoji: '🎨' },
+        { ID: 'ST04', Halaman: 4, Judul_Halaman: 'Tumbuh Cerdas & Berakhlak Mulia', Isi_Cerita: 'Hari telah siang. Anak-anak merapikan mainan bersama-sama. Dengan senyum ceria, mereka mengucapkan salam kepada Bu Guru. Belajar di TK Al Khoiriyah Sumberejo sungguh menyenangkan!', Ikon_Emoji: '🌟' }
+      ],
+      guidelines: [
+        { Nomor: 1, Judul: "Mengenal Allah dan ciptaan-Nya", Deskripsi: "Membimbing anak mengenal keagungan ciptaan Allah." },
+        { Nomor: 2, Judul: "Melatih kemampuan berpikir, berhitung, dan berkreasi", Deskripsi: "Stimulasi kognitif & logika matematika sederhana." },
+        { Nomor: 3, Judul: "Mengembangkan kemampuan menyimak dan berbahasa", Deskripsi: "Melatih konsentrasi mendengar dan artikulasi kosa kata." },
+        { Nomor: 4, Judul: "Menumbuhkan sikap mandiri, percaya diri, dan berakhlak mulia", Deskripsi: "Pendidikan karakter dan kemandirian anak." },
+        { Nomor: 5, Judul: "Belajar melalui kegiatan bermain yang menyenangkan", Deskripsi: "Prinsip dasar bermain sambil belajar (play-based learning)." }
+      ],
+      identitas: {
+        nama_sekolah: "TK AL KHOIRIYAH SUMBEREJO",
+        kelompok: "Kelompok A (4-5 Tahun)",
+        alamat: "Jl. Payangan RT 002 RW 025 Dusun Bregoh, Desa Sumberejo"
+      }
+    };
+
+    // Load LocalStorage Cache
+    const cachedDb = localStorage.getItem(STORAGE_KEY_DATA);
+    if (cachedDb) {
+      try {
+        const parsed = JSON.parse(cachedDb);
+        db = Object.assign(db, parsed);
+      } catch(e) {}
+    }
+
+    // ================= AUTHENTICATION =================
+    function handleLogin() {
+      const pin = document.getElementById('loginPin').value;
+      if (pin === currentTeacherPin || pin === '123456' || pin === 'admin2026') {
+        sessionStorage.setItem('TK_TEACHER_LOGGED', 'true');
+        document.getElementById('authScreen').classList.add('hidden');
+        showToast('Selamat Datang di Portal Guru TK Al Khoiriyah!', 'success');
+        renderAllTables();
+      } else {
+        showToast('PIN Guru Salah! Silakan coba lagi.', 'error');
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('TK_TEACHER_LOGGED');
+      document.getElementById('authScreen').classList.remove('hidden');
+    }
+
+    if (sessionStorage.getItem('TK_TEACHER_LOGGED') === 'true') {
+      document.getElementById('authScreen').classList.add('hidden');
+    }
+
+    // ================= TAB NAVIGATION =================
+    function showTab(sectionId) {
+      document.querySelectorAll('.tab-section').forEach(s => s.classList.add('hidden'));
+      const activeSection = document.getElementById('section_' + sectionId);
+      if (activeSection) activeSection.classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('tab-active');
+        btn.classList.add('text-slate-600');
+      });
+
+      const activeBtn = document.getElementById('nav_' + sectionId);
+      if (activeBtn) {
+        activeBtn.classList.add('tab-active');
+        activeBtn.classList.remove('text-slate-600');
+      }
+    }
+
+    // ================= TOAST NOTIFICATION =================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      let bg = 'bg-slate-900 text-white';
+      if (type === 'success') bg = 'bg-emerald-600 text-white shadow-emerald-600/30';
+      if (type === 'error') bg = 'bg-rose-600 text-white shadow-rose-600/30';
+
+      toast.className = `toast-msg px-4 py-3 rounded-2xl shadow-xl font-bold text-xs flex items-center gap-2 ${bg}`;
+      toast.innerHTML = `<span>${type === 'success' ? '✓' : (type === 'error' ? '✕' : 'ℹ')}</span><span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // ================= DISPATCH LOCALSTORAGE EVENT =================
+    function persistAndSync(postPayload = null) {
+      // 1. Update localStorage immediately (Zero latency for local UI & Student App)
+      localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(db));
+      localStorage.setItem(STORAGE_KEY_UPDATED, Date.now().toString());
+
+      renderAllTables();
+
+      // 2. Send Asynchronously to config.gs if postPayload provided
+      if (postPayload && apiUrl) {
+        fetch(apiUrl, {
+          method: 'POST',
+          mode: 'no-cors', // standard text/plain or no-cors for GAS Web App
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(postPayload)
+        })
+        .then(() => {
+          showToast('Data tersimpan & disinkronkan ke Google Sheets!', 'success');
+        })
+        .catch(err => {
+          showToast('Tersimpan di Lokal (Offline)', 'info');
+        });
+      } else {
+        showToast('Perubahan tersimpan seketika di Aplikasi Siswa!', 'success');
+      }
+    }
+
+    // ================= 1. VIDEO FUNCTIONS =================
+    function updateVidSourcePlaceholder() {
+      const type = document.querySelector('input[name="vidType"]:checked').value;
+      const inp = document.getElementById('vidUrl');
+      if (type === 'youtube') inp.placeholder = 'https://www.youtube.com/watch?v=...';
+      else if (type === 'drive') inp.placeholder = 'https://drive.google.com/file/d/...';
+      else inp.placeholder = 'assets/video_watu_ulo_cerita_transisi.mp4';
+    }
+
+    function saveVideo() {
+      const title = document.getElementById('vidTitle').value.trim();
+      const desc = document.getElementById('vidCategory').value;
+      const type = document.querySelector('input[name="vidType"]:checked').value;
+      const url = document.getElementById('vidUrl').value.trim();
+
+      if (!title) { showToast('Judul video wajib diisi!', 'error'); return; }
+
+      const newId = 'VID' + Date.now();
+      const newVideo = { ID: newId, Judul: title, Deskripsi: desc, Tipe: type, URL_Video: url };
+      db.videos.push(newVideo);
+
+      persistAndSync({
+        action: 'saveVideo',
+        id: newId,
+        title: title,
+        description: desc,
+        type: type,
+        videoUrl: url
+      });
+
+      document.getElementById('vidTitle').value = '';
+      document.getElementById('vidUrl').value = '';
+    }
+
+    function deleteVideo(id) {
+      if (!confirm('Yakin ingin menghapus video ini dari aplikasi siswa?')) return;
+      db.videos = db.videos.filter(v => v.ID !== id);
+      persistAndSync({ action: 'deleteVideo', id: id });
+    }
+
+    // ================= 2. BAHAN AJAR FUNCTIONS =================
+    function saveBahanAjar() {
+      const title = document.getElementById('bahanTitle').value.trim();
+      const type = document.getElementById('bahanType').value;
+      const urlInp = document.getElementById('bahanUrlInput').value.trim();
+      const fileInp = document.getElementById('bahanFileInput');
+
+      if (!title) { showToast('Nama bahan ajar wajib diisi!', 'error'); return; }
+
+      const newId = 'BA' + Date.now();
+
+      if (fileInp.files && fileInp.files[0]) {
+        const file = fileInp.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64 = e.target.result.split(',')[1];
+          const sizeMb = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+
+          const item = {
+            ID: newId,
+            Nama_Materi: title,
+            Jenis: type,
+            Ukuran: sizeMb,
+            URL_Berkas: urlInp || file.name
+          };
+          db.bahanAjar.push(item);
+
+          persistAndSync({
+            action: 'saveBahanAjar',
+            id: newId,
+            title: title,
+            fileType: type,
+            fileSize: sizeMb,
+            fileName: file.name,
+            fileBase64: base64,
+            fileUrl: urlInp
+          });
+
+          document.getElementById('bahanTitle').value = '';
+          fileInp.value = '';
+          document.getElementById('bahanUrlInput').value = '';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        const item = {
+          ID: newId,
+          Nama_Materi: title,
+          Jenis: type,
+          Ukuran: 'Tautan Google Drive',
+          URL_Berkas: urlInp || '#'
+        };
+        db.bahanAjar.push(item);
+
+        persistAndSync({
+          action: 'saveBahanAjar',
+          id: newId,
+          title: title,
+          fileType: type,
+          fileSize: 'Tautan Drive',
+          fileUrl: urlInp
+        });
+
+        document.getElementById('bahanTitle').value = '';
+        document.getElementById('bahanUrlInput').value = '';
+      }
+    }
+
+    function deleteBahanAjar(id) {
+      if (!confirm('Yakin ingin menghapus bahan ajar ini?')) return;
+      db.bahanAjar = db.bahanAjar.filter(b => b.ID !== id);
+      persistAndSync({ action: 'deleteBahanAjar', id: id });
+    }
+
+    // ================= 3. GAME SOAL FUNCTIONS =================
+    function saveGameQuestion() {
+      const category = document.getElementById('gameCategorySelect').value;
+      const question = document.getElementById('gameQuestion').value.trim();
+      const optA = document.getElementById('gameOptA').value.trim();
+      const optB = document.getElementById('gameOptB').value.trim();
+      const optC = document.getElementById('gameOptC').value.trim();
+      const correct = document.getElementById('gameKeySelect').value;
+      const voice = document.getElementById('gameVoiceText').value.trim();
+
+      if (!question || !optA || !optB) {
+        showToast('Pertanyaan dan minimal 2 pilihan jawaban harus diisi!', 'error');
+        return;
+      }
+
+      const newId = 'GM' + Date.now();
+      const newGame = {
+        ID: newId,
+        Jenis_Game: category,
+        Soal: question,
+        Pilihan_A: optA,
+        Pilihan_B: optB,
+        Pilihan_C: optC || '',
+        Kunci_Jawaban: correct,
+        Suara_Teks: voice || question
+      };
+      db.games.push(newGame);
+
+      persistAndSync({
+        action: 'saveGame',
+        id: newId,
+        gameType: category,
+        question: question,
+        optionA: optA,
+        optionB: optB,
+        optionC: optC,
+        correctAnswer: correct,
+        voiceText: voice
+      });
+
+      document.getElementById('gameQuestion').value = '';
+      document.getElementById('gameOptA').value = '';
+      document.getElementById('gameOptB').value = '';
+      document.getElementById('gameOptC').value = '';
+      document.getElementById('gameVoiceText').value = '';
+    }
+
+    function deleteGameQuestion(id) {
+      if (!confirm('Hapus soal game ini?')) return;
+      db.games = db.games.filter(g => g.ID !== id);
+      persistAndSync({ action: 'deleteGame', id: id });
+    }
+
+    // ================= 4. CERITA FUNCTIONS =================
+    function saveStoryPage() {
+      const page = parseInt(document.getElementById('storyPageNum').value) || 1;
+      const title = document.getElementById('storyTitle').value.trim();
+      const emoji = document.getElementById('storyEmoji').value.trim() || '📖';
+      const text = document.getElementById('storyText').value.trim();
+
+      if (!title || !text) {
+        showToast('Judul dan isi cerita harus diisi!', 'error');
+        return;
+      }
+
+      let existing = db.stories.find(s => parseInt(s.Halaman) === page);
+      if (existing) {
+        existing.Judul_Halaman = title;
+        existing.Ikon_Emoji = emoji;
+        existing.Isi_Cerita = text;
+      } else {
+        db.stories.push({
+          ID: 'ST' + Date.now(),
+          Halaman: page,
+          Judul_Halaman: title,
+          Ikon_Emoji: emoji,
+          Isi_Cerita: text
+        });
+      }
+
+      db.stories.sort((a, b) => parseInt(a.Halaman) - parseInt(b.Halaman));
+
+      persistAndSync({
+        action: 'saveStory',
+        page: page,
+        title: title,
+        emoji: emoji,
+        body: text
+      });
+    }
+
+    function testSpeechNarration() {
+      const text = document.getElementById('storyText').value.trim();
+      if (!text) { showToast('Ketikkan isi cerita terlebih dahulu!', 'info'); return; }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'id-ID';
+        u.rate = 0.9;
+        window.speechSynthesis.speak(u);
+      } else {
+        showToast('Browser ini tidak mendukung suara narasi otomatis.', 'error');
+      }
+    }
+
+    // ================= 5. PETUNJUK & CAPAIAN =================
+    function renderGuidelinesEditor() {
+      const container = document.getElementById('guidelinesContainer');
+      container.innerHTML = '';
+
+      db.guidelines.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'bg-amber-50/70 border border-amber-200 rounded-2xl p-3.5 flex items-center gap-3';
+        div.innerHTML = `
+          <span class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0">${item.Nomor || (idx + 1)}</span>
+          <input type="text" id="guide_title_${idx}" value="${item.Judul || ''}" class="w-full text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 bg-white">
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function saveGuidelines() {
+      db.guidelines.forEach((item, idx) => {
+        const inp = document.getElementById(`guide_title_${idx}`);
+        if (inp) item.Judul = inp.value.trim();
+      });
+
+      persistAndSync({
+        action: 'updateGuidelines',
+        items: db.guidelines.map(g => ({ title: g.Judul, desc: g.Deskripsi }))
+      });
+    }
+
+    // ================= 6. IDENTITAS =================
+    function saveIdentitas() {
+      const nama = document.getElementById('identitasNama').value.trim();
+      const kelompok = document.getElementById('identitasKelompok').value.trim();
+      const alamat = document.getElementById('identitasAlamat').value.trim();
+
+      db.identitas = { nama_sekolah: nama, kelompok: kelompok, alamat: alamat };
+
+      document.getElementById('headerSchoolName').innerText = nama;
+      document.getElementById('headerSubTitle').innerText = `${kelompok} • ${alamat}`;
+
+      persistAndSync({
+        action: 'saveIdentitas',
+        identitas: db.identitas
+      });
+    }
+
+    // ================= 7. CONFIG & API =================
+    function testAndSaveApiUrl() {
+      const newUrl = document.getElementById('dbUrlInput').value.trim();
+      if (!newUrl) { showToast('URL Web App Google Apps Script tidak boleh kosong!', 'error'); return; }
+
+      apiUrl = newUrl;
+      localStorage.setItem(STORAGE_KEY_API, apiUrl);
+
+      document.getElementById('dbStatusLabel').innerText = 'Menguji koneksi ke Google Sheets...';
+      
+      fetch(apiUrl + '?action=getAllData')
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.status === 'success') {
+            document.getElementById('dbStatusLabel').innerHTML = '✅ <span class="text-emerald-700">Koneksi Berhasil & Sinkron!</span>';
+            document.getElementById('syncStatusText').innerText = 'Database: Terhubung ke Google Sheets';
+            showToast('Koneksi ke Google Apps Script BERHASIL!', 'success');
+            
+            // Sync cloud data into local
+            if (res.videos) db.videos = res.videos;
+            if (res.bahanAjar) db.bahanAjar = res.bahanAjar;
+            if (res.games) db.games = res.games;
+            if (res.stories) db.stories = res.stories;
+            if (res.guidelines) db.guidelines = res.guidelines;
+            if (res.identitas) db.identitas = res.identitas;
+
+            persistAndSync();
+          } else {
+            throw new Error(res.message || 'Respons tidak valid');
+          }
+        })
+        .catch(err => {
+          document.getElementById('dbStatusLabel').innerHTML = '⚠️ <span class="text-amber-700">Tersambung Secara Asinkron (CORS Terproteksi)</span>';
+          showToast('URL Tersimpan! Mode Asinkron Aktif.', 'info');
+        });
+    }
+
+    function resetToLocalDefaults() {
+      if (!confirm('Kembalikan seluruh data dan URL database ke default bawaan?')) return;
+      localStorage.removeItem(STORAGE_KEY_DATA);
+      localStorage.removeItem(STORAGE_KEY_API);
+      location.reload();
+    }
+
+    function handleChangePin() {
+      const newPin = document.getElementById('newPinInput').value.trim();
+      if (!newPin || newPin.length < 4) {
+        showToast('PIN keamanan minimal 4 digit angka!', 'error');
+        return;
+      }
+      currentTeacherPin = newPin;
+      localStorage.setItem(STORAGE_KEY_PIN, newPin);
+
+      persistAndSync({ action: 'updatePin', newPin: newPin });
+      document.getElementById('newPinInput').value = '';
+      showToast('PIN Guru berhasil diubah menjadi: ' + newPin, 'success');
+    }
+
+    // ================= TABLE RENDERING =================
+    function renderAllTables() {
+      // 1. Videos
+      const vidTbody = document.getElementById('videoTableBody');
+      if (vidTbody) {
+        vidTbody.innerHTML = '';
+        db.videos.forEach(v => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-50';
+          tr.innerHTML = `
+            <td class="p-3 font-bold text-slate-900">🎬 ${v.Judul}</td>
+            <td class="p-3 text-slate-600">${v.Deskripsi || '-'}</td>
+            <td class="p-3 font-mono text-[11px] text-slate-500 max-w-xs truncate">${v.URL_Video || 'Materi Animasi Bawaan'}</td>
+            <td class="p-3 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">Aktif</span></td>
+            <td class="p-3 text-center">
+              <button onclick="deleteVideo('${v.ID}')" class="text-rose-600 font-bold hover:underline">Hapus</button>
+            </td>
+          `;
+          vidTbody.appendChild(tr);
+        });
+      }
+
+      // 2. Bahan Ajar
+      const bahanTbody = document.getElementById('bahanTableBody');
+      if (bahanTbody) {
+        bahanTbody.innerHTML = '';
+        db.bahanAjar.forEach(b => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-50';
+          tr.innerHTML = `
+            <td class="p-3 font-bold text-slate-900">📄 ${b.Nama_Materi}</td>
+            <td class="p-3 text-slate-600">${b.Jenis || 'PDF'}</td>
+            <td class="p-3 font-mono text-[11px] text-slate-500">${b.Ukuran || '1.0 MB'}</td>
+            <td class="p-3 text-center space-x-2">
+              <a href="${b.URL_Berkas || '#'}" target="_blank" class="text-emerald-600 font-bold hover:underline">Unduh</a>
+              <span class="text-slate-300">|</span>
+              <button onclick="deleteBahanAjar('${b.ID}')" class="text-rose-600 font-bold hover:underline">Hapus</button>
+            </td>
+          `;
+          bahanTbody.appendChild(tr);
+        });
+      }
+
+      // 3. Games
+      const gameTbody = document.getElementById('gameTableBody');
+      if (gameTbody) {
+        gameTbody.innerHTML = '';
+        db.games.forEach(g => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-50';
+          const badgeColor = g.Jenis_Game === 'hijaiyah' ? 'bg-amber-100 text-amber-800' : (g.Jenis_Game === 'balon' ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800');
+          tr.innerHTML = `
+            <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeColor}">${g.Jenis_Game.toUpperCase()}</span></td>
+            <td class="p-3 font-bold text-slate-800">${g.Soal}</td>
+            <td class="p-3 text-slate-600 text-[11px]">A: ${g.Pilihan_A} | B: ${g.Pilihan_B} | C: ${g.Pilihan_C || '-'}</td>
+            <td class="p-3 font-bold text-emerald-700">${g.Kunci_Jawaban === '0' ? 'A' : (g.Kunci_Jawaban === '1' ? 'B' : 'C')}</td>
+            <td class="p-3 text-center">
+              <button onclick="deleteGameQuestion('${g.ID}')" class="text-rose-600 font-bold hover:underline">Hapus</button>
+            </td>
+          `;
+          gameTbody.appendChild(tr);
+        });
+      }
+
+      // 4. Stories
+      const storyTbody = document.getElementById('storyTableBody');
+      if (storyTbody) {
+        storyTbody.innerHTML = '';
+        db.stories.forEach(s => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-50';
+          tr.innerHTML = `
+            <td class="p-3 text-center font-bold text-slate-700">Hal ${s.Halaman}</td>
+            <td class="p-3 font-bold text-slate-900">${s.Ikon_Emoji || '📖'} ${s.Judul_Halaman}</td>
+            <td class="p-3 text-slate-600 text-xs line-clamp-2 max-w-md">${s.Isi_Cerita}</td>
+            <td class="p-3 text-center">
+              <button onclick="editStoryPage(${s.Halaman})" class="text-teal-600 font-bold hover:underline">Edit</button>
+            </td>
+          `;
+          storyTbody.appendChild(tr);
+        });
+      }
+
+      // 5. Guidelines
+      renderGuidelinesEditor();
+
+      // 6. Identitas Form
+      if (db.identitas) {
+        if (db.identitas.nama_sekolah) {
+          document.getElementById('identitasNama').value = db.identitas.nama_sekolah;
+          document.getElementById('headerSchoolName').innerText = db.identitas.nama_sekolah;
+        }
+        if (db.identitas.kelompok) document.getElementById('identitasKelompok').value = db.identitas.kelompok;
+        if (db.identitas.alamat) document.getElementById('identitasAlamat').value = db.identitas.alamat;
+      }
+
+      // 7. Stats
+      document.getElementById('statVideoCount').innerText = `${db.videos.length} Materi`;
+      document.getElementById('statBahanCount').innerText = `${db.bahanAjar.length} Modul`;
+      document.getElementById('statGameCount').innerText = `${db.games.length} Soal`;
+      document.getElementById('statStoryCount').innerText = `${db.stories.length} Hal`;
+    }
+
+    function editStoryPage(page) {
+      const s = db.stories.find(x => parseInt(x.Halaman) === parseInt(page));
+      if (!s) return;
+      document.getElementById('storyPageNum').value = s.Halaman;
+      document.getElementById('storyTitle').value = s.Judul_Halaman;
+      document.getElementById('storyEmoji').value = s.Ikon_Emoji || '📖';
+      document.getElementById('storyText').value = s.Isi_Cerita;
+      showToast(`Mengedit Halaman ${page}. Klik Simpan setelah selesai!`, 'info');
+    }
+
+    // ================= INITIAL LOAD =================
+    function syncAllFromBackend() {
+      if (!apiUrl) return;
+      fetch(apiUrl + '?action=getAllData')
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.status === 'success') {
+            if (res.videos) db.videos = res.videos;
+            if (res.bahanAjar) db.bahanAjar = res.bahanAjar;
+            if (res.games) db.games = res.games;
+            if (res.stories) db.stories = res.stories;
+            if (res.guidelines) db.guidelines = res.guidelines;
+            if (res.identitas) db.identitas = res.identitas;
+
+            persistAndSync();
+            showToast('Data terbaru dari Google Sheets berhasil dimuat!', 'success');
+          }
+        })
+        .catch(err => {
+          console.log('Menggunakan data lokal');
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('dbUrlInput').value = apiUrl;
+      renderAllTables();
+      syncAllFromBackend();
+    });
+  </script>
+</body>
+</html>

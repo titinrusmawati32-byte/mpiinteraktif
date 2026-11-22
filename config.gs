@@ -1,16 +1,18 @@
 /**
  * =========================================================================
- * GOOGLE APPS SCRIPT BACKEND API (config.gs)
+ * GOOGLE APPS SCRIPT BACKEND REST API (config.gs)
  * DATABASE REST API UNTUK APLIKASI WEB VERCEL & GITHUB
  * TK AL KHOIRIYAH SUMBEREJO - Kelompok A (4-5 Tahun)
  * =========================================================================
  * 
  * CARA MENGGUNAKAN:
- * 1. Buat Google Spreadsheet baru di Google Drive Anda.
+ * 1. Buka Google Spreadsheet Anda di Google Drive.
  * 2. Klik menu 'Ekstensi' > 'Apps Script'.
- * 3. Hapus kode bawaan dan tempel SELURUH isi file ini.
- * 4. Jalankan fungsi 'setupDatabase' sekali melalui tombol 'Run' (Izinkan akses).
- * 5. Klik 'Deploy' > 'New deployment' > Pilih jenis 'Web app':
+ * 3. Hapus seluruh isi kode lama dan tempel SELURUH isi file ini.
+ * 4. Klik fungsi 'setupDatabase' pada dropdown, lalu klik tombol 'Jalankan' (Run).
+ *    (Berikan izin akses Google Spreadsheet & Google Drive saat diminta).
+ * 5. Klik 'Deploy' (Terapkan) > 'New deployment' (Penerapan Baru) > Pilih 'Web app':
+ *    - Description: "API TK Al Khoiriyah v2"
  *    - Execute as: Me (email Anda)
  *    - Who has access: Anyone (Siapa saja)
  * 6. Salin 'Web app URL' yang dihasilkan, lalu tempel di Portal Guru (guru.html).
@@ -25,6 +27,7 @@ function setupDatabase() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
   const tables = {
+    // Tabel 1: Video Edukasi
     "tbl_video": [
       ["ID", "Judul", "Deskripsi", "Tipe", "URL_Video", "Status", "Tanggal"],
       ["VID00", "Video Cerita Watu Ulo", "Video edukasi cerita transisi anak PAUD", "local", "assets/video_watu_ulo_cerita_transisi.mp4", "Aktif", new Date()],
@@ -33,6 +36,16 @@ function setupDatabase() {
       ["VID03", "Lagu Ceria Sayang Semuanya", "Satu satu aku sayang ibu, dua dua juga sayang ayah...", "default", "", "Aktif", new Date()],
       ["VID04", "Mengenal Angka 1 sampai 10", "Menghitung buah-buahan dan bintang warna-warni", "default", "", "Aktif", new Date()]
     ],
+
+    // Tabel 2: Bahan Ajar & Modul (LKPD)
+    "tbl_bahan_ajar": [
+      ["ID", "Nama_Materi", "Jenis", "Ukuran", "URL_Berkas", "Status", "Tanggal"],
+      ["BA01", "Lembar Kerja Mewarnai Kubah Masjid", "PDF Dokumen", "1.2 MB", "assets/lkpd_mewarnai.pdf", "Aktif", new Date()],
+      ["BA02", "Kartu Huruf Hijaiyah Ceria", "PNG Gambar HD", "3.4 MB", "assets/kartu_hijaiyah.png", "Aktif", new Date()],
+      ["BA03", "Modul Ajar Tematik PAUD - Semester 1", "PDF Dokumen", "2.1 MB", "assets/modul_ajar.pdf", "Aktif", new Date()]
+    ],
+
+    // Tabel 3: Soal Game Edukasi (Hijaiyah, Balon, Hewan)
     "tbl_game": [
       ["ID", "Jenis_Game", "Soal", "Pilihan_A", "Pilihan_B", "Pilihan_C", "Kunci_Jawaban", "Suara_Teks"],
       ["GM01", "hijaiyah", "Manakah huruf BA (ب) yang ada satu titik di bawah?", "Alif (أ)", "Ba (ب)", "Ta (ت)", "1", "Manakah huruf Ba yang ada satu titik di bawah?"],
@@ -45,6 +58,8 @@ function setupDatabase() {
       ["GM08", "hewan", "Suara: 'Mooo... Mooo...' Siapa aku?", "Ayam 🐔", "Kambing 🐐", "Sapi 🐮", "2", "Mooo mooo! Siapakah penghasil susu segar?"],
       ["GM09", "hewan", "Suara: 'Meeong... Meeong...' Siapa aku?", "Kucing 🐱", "Burung 🐦", "Ikan 🐟", "0", "Meeong meeong! Siapa teman berbulu yang lucu?"]
     ],
+
+    // Tabel 4: Buku Cerita Dongeng Digital
     "tbl_cerita": [
       ["ID", "Halaman", "Judul_Halaman", "Isi_Cerita", "Ikon_Emoji", "Gambar_URL"],
       ["ST01", 1, "Pagi Ceria di Sekolah", "Pagi yang indah dan matahari tersenyum hangat. Budi dan Siti berjalan menuju TK Al Khoiriyah Sumberejo dengan hati yang riang gembira. Mereka siap belajar dan bermain bersama Bu Guru dan teman-teman.", "🏫", ""],
@@ -52,6 +67,8 @@ function setupDatabase() {
       ["ST03", 3, "Belajar & Berkreasi Bersama", "Di kelas, Budi mewarnai gambar masjid dan Siti menyusun balok menara yang tinggi. Mereka saling meminjamkan krayon dengan ramah. Berbagi adalah perbuatan yang sangat terpuji!", "🎨", ""],
       ["ST04", 4, "Tumbuh Cerdas & Berakhlak Mulia", "Hari telah siang. Anak-anak merapikan mainan bersama-sama. Dengan senyum ceria, mereka mengucapkan salam kepada Bu Guru. Belajar di TK Al Khoiriyah Sumberejo sungguh menyenangkan!", "🌟", ""]
     ],
+
+    // Tabel 5: Capaian & Petunjuk Pembelajaran (5 Poin)
     "tbl_petunjuk": [
       ["ID", "Kategori", "Nomor", "Judul", "Deskripsi"],
       ["PT01", "tujuan", 1, "Mengenal Allah dan ciptaan-Nya", "Membimbing anak mengenal keagungan ciptaan Allah."],
@@ -60,6 +77,16 @@ function setupDatabase() {
       ["PT04", "tujuan", 4, "Menumbuhkan sikap mandiri, percaya diri, dan berakhlak mulia", "Pendidikan karakter dan kemandirian anak."],
       ["PT05", "tujuan", 5, "Belajar melalui kegiatan bermain yang menyenangkan", "Prinsip dasar bermain sambil belajar (play-based learning)."]
     ],
+
+    // Tabel 6: Identitas Satuan PAUD
+    "tbl_identitas": [
+      ["Key", "Value"],
+      ["nama_sekolah", "TK AL KHOIRIYAH SUMBEREJO"],
+      ["kelompok", "Kelompok A (4-5 Tahun)"],
+      ["alamat", "Jl. Payangan RT 002 RW 025 Dusun Bregoh, Desa Sumberejo"]
+    ],
+
+    // Tabel 7: Akun Admin & Guru
     "tbl_admin": [
       ["Username", "Password_PIN", "Nama_Guru", "Role"],
       ["admin", "123456", "Guru TK Al Khoiriyah", "SuperAdmin"]
@@ -72,16 +99,16 @@ function setupDatabase() {
       sheet = ss.insertSheet(sheetName);
       const rows = tables[sheetName];
       sheet.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
-      sheet.getRange(1, 1, 1, rows[0].length).setBackground("#10b981").setFontColor("#ffffff").setFontWeight("bold");
+      sheet.getRange(1, 1, 1, rows[0].length).setBackground("#059669").setFontColor("#ffffff").setFontWeight("bold");
     }
   }
 
-  Logger.log("✅ Database TK Al Khoiriyah berhasil disiapkan!");
+  Logger.log("✅ Database TK Al Khoiriyah v2 berhasil disiapkan!");
 }
 
 /**
  * 2. HTTP GET REQUEST (doGet)
- * Menangani permintaan data dari Vercel / GitHub
+ * Mengirimkan data ke aplikasi Vercel / GitHub
  */
 function doGet(e) {
   const params = (e && e.parameter) || {};
@@ -96,18 +123,24 @@ function doGet(e) {
       responseData = {
         status: "success",
         videos: getSheetData(ss.getSheetByName("tbl_video")),
+        bahanAjar: getSheetData(ss.getSheetByName("tbl_bahan_ajar")),
         games: getSheetData(ss.getSheetByName("tbl_game")),
         stories: getSheetData(ss.getSheetByName("tbl_cerita")),
-        guidelines: getSheetData(ss.getSheetByName("tbl_petunjuk"))
+        guidelines: getSheetData(ss.getSheetByName("tbl_petunjuk")),
+        identitas: getSheetKeyValue(ss.getSheetByName("tbl_identitas"))
       };
     } else if (action === 'getVideos') {
       responseData = { status: "success", data: getSheetData(ss.getSheetByName("tbl_video")) };
+    } else if (action === 'getBahanAjar') {
+      responseData = { status: "success", data: getSheetData(ss.getSheetByName("tbl_bahan_ajar")) };
     } else if (action === 'getGames') {
       responseData = { status: "success", data: getSheetData(ss.getSheetByName("tbl_game")) };
     } else if (action === 'getStories') {
       responseData = { status: "success", data: getSheetData(ss.getSheetByName("tbl_cerita")) };
     } else if (action === 'getGuidelines') {
       responseData = { status: "success", data: getSheetData(ss.getSheetByName("tbl_petunjuk")) };
+    } else if (action === 'getIdentitas') {
+      responseData = { status: "success", data: getSheetKeyValue(ss.getSheetByName("tbl_identitas")) };
     } else if (action === 'verifyPin') {
       const pin = params.pin || '';
       const adminSheet = ss.getSheetByName("tbl_admin");
@@ -130,7 +163,7 @@ function doGet(e) {
 
 /**
  * 3. HTTP POST REQUEST (doPost)
- * Menangani penambahan, pembaruan, dan penghapusan data dari Portal Guru di Vercel
+ * Menangani penambahan, pembaruan, dan penghapusan data dari Portal Guru
  */
 function doPost(e) {
   let responseData = {};
@@ -150,7 +183,7 @@ function doPost(e) {
     const action = payload.action || '';
     const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-    // 1. Simpan Video Baru / Update Video
+    // 1. Simpan Video Baru / Update
     if (action === 'saveVideo') {
       const sheet = ss.getSheetByName("tbl_video");
       const newId = payload.id || ("VID" + Utilities.formatDate(new Date(), "GMT+7", "yyMMddHHmmss"));
@@ -183,7 +216,63 @@ function doPost(e) {
         ? { status: "success", message: "Video berhasil dihapus!" }
         : { status: "error", message: "Video tidak ditemukan." };
     }
-    // 3. Simpan Soal Game Baru
+    // 3. Simpan Bahan Ajar (LKPD)
+    else if (action === 'saveBahanAjar') {
+      const sheet = ss.getSheetByName("tbl_bahan_ajar");
+      const newId = payload.id || ("BA" + Utilities.formatDate(new Date(), "GMT+7", "yyMMddHHmmss"));
+      let fileUrl = payload.fileUrl || "";
+
+      // Jika ada file upload berupa base64, simpan langsung ke Google Drive
+      if (payload.fileBase64 && payload.fileName) {
+        try {
+          const folderName = "TK_AL_KHOIRIYAH_BAHAN_AJAR";
+          let folder;
+          const folders = DriveApp.getFoldersByName(folderName);
+          if (folders.hasNext()) {
+            folder = folders.next();
+          } else {
+            folder = DriveApp.createFolder(folderName);
+          }
+          
+          const decoded = Utilities.base64Decode(payload.fileBase64);
+          const blob = Utilities.newBlob(decoded, payload.fileType || "application/octet-stream", payload.fileName);
+          const file = folder.createFile(blob);
+          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+          fileUrl = file.getUrl();
+        } catch(driveErr) {
+          Logger.log("Drive upload error: " + driveErr);
+        }
+      }
+
+      sheet.appendRow([
+        newId,
+        payload.title || "Bahan Ajar Baru",
+        payload.fileType || "PDF Dokumen",
+        payload.fileSize || "1.0 MB",
+        fileUrl,
+        "Aktif",
+        new Date()
+      ]);
+      responseData = { status: "success", message: "Bahan ajar berhasil disimpan ke database!", fileUrl: fileUrl };
+    }
+    // 4. Hapus Bahan Ajar
+    else if (action === 'deleteBahanAjar') {
+      const sheet = ss.getSheetByName("tbl_bahan_ajar");
+      const id = payload.id;
+      const data = sheet.getDataRange().getValues();
+      let deleted = false;
+      for (let i = 1; i < data.length; i++) {
+        if (String(data[i][0]) === String(id)) {
+          sheet.deleteRow(i + 1);
+          deleted = true;
+          break;
+        }
+      }
+      responseData = deleted 
+        ? { status: "success", message: "Bahan ajar berhasil dihapus!" }
+        : { status: "error", message: "Bahan ajar tidak ditemukan." };
+    }
+    // 5. Simpan Soal Game Baru
     else if (action === 'saveGame') {
       const sheet = ss.getSheetByName("tbl_game");
       const newId = payload.id || ("GM" + Utilities.formatDate(new Date(), "GMT+7", "yyMMddHHmmss"));
@@ -200,7 +289,7 @@ function doPost(e) {
       ]);
       responseData = { status: "success", message: "Soal game berhasil disimpan ke database!" };
     }
-    // 4. Hapus Soal Game
+    // 6. Hapus Soal Game
     else if (action === 'deleteGame') {
       const sheet = ss.getSheetByName("tbl_game");
       const id = payload.id;
@@ -217,7 +306,7 @@ function doPost(e) {
         ? { status: "success", message: "Soal game berhasil dihapus!" }
         : { status: "error", message: "Soal tidak ditemukan." };
     }
-    // 5. Simpan / Update Halaman Cerita
+    // 7. Simpan / Update Halaman Cerita
     else if (action === 'saveStory') {
       const sheet = ss.getSheetByName("tbl_cerita");
       const pageNum = parseInt(payload.page) || 1;
@@ -249,7 +338,7 @@ function doPost(e) {
         responseData = { status: "success", message: "Halaman cerita baru berhasil ditambahkan!" };
       }
     }
-    // 6. Update Tujuan Pembelajaran (5 Poin)
+    // 8. Update Capaian Pembelajaran (5 Poin)
     else if (action === 'updateGuidelines') {
       const sheet = ss.getSheetByName("tbl_petunjuk");
       const items = payload.items || [];
@@ -262,7 +351,20 @@ function doPost(e) {
       });
       responseData = { status: "success", message: "Tujuan pembelajaran berhasil diperbarui!" };
     }
-    // 7. Ubah PIN Keamanan Guru
+    // 9. Update Identitas Satuan PAUD
+    else if (action === 'saveIdentitas') {
+      const sheet = ss.getSheetByName("tbl_identitas");
+      const idData = payload.identitas || {};
+      const rows = sheet.getDataRange().getValues();
+      for (let i = 1; i < rows.length; i++) {
+        const key = rows[i][0];
+        if (idData[key] !== undefined) {
+          sheet.getRange(i + 1, 2).setValue(idData[key]);
+        }
+      }
+      responseData = { status: "success", message: "Identitas sekolah berhasil diperbarui!" };
+    }
+    // 10. Ubah PIN Keamanan Guru
     else if (action === 'updatePin') {
       const sheet = ss.getSheetByName("tbl_admin");
       const newPin = payload.newPin;
@@ -300,6 +402,17 @@ function getSheetData(sheet) {
     list.push(obj);
   }
   return list;
+}
+
+// Helper: Membaca sheet Key-Value
+function getSheetKeyValue(sheet) {
+  if (!sheet) return {};
+  const rows = sheet.getDataRange().getValues();
+  let map = {};
+  for (let i = 1; i < rows.length; i++) {
+    map[rows[i][0]] = rows[i][1];
+  }
+  return map;
 }
 
 // Helper: Format Output JSON dengan Header CORS Lengkap

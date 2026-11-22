@@ -271,8 +271,8 @@ window.INLINE_BG_PETUNJUK = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/
     <div class="top-floating-bar">
       <div class="badge-pill">
         <span>🕌</span>
-        <span>TK AL KHOIRIYAH SUMBEREJO</span>
-        <span class="text-xs text-emerald-600 font-normal hidden sm:inline">(Kelompok A 4-5 Thn)</span>
+        <span id="studentSchoolTitle">TK AL KHOIRIYAH SUMBEREJO</span>
+        <span class="text-xs text-emerald-600 font-normal hidden sm:inline" id="studentSchoolGroup">(Kelompok A 4-5 Thn)</span>
       </div>
 
       <div class="flex items-center gap-2">
@@ -281,7 +281,12 @@ window.INLINE_BG_PETUNJUK = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/
           <span class="hidden sm:inline" id="voiceText">Suara: Nyala</span>
         </button>
 
-        <a href="guru.html" class="action-pill-btn text-indigo-700 border-indigo-200" title="Buka Portal Guru & Manajemen Konten">
+        <button onclick="openModal('modalBahanAjar')" class="action-pill-btn text-indigo-700 border-indigo-200" title="Buka Lembar Kerja & Bahan Ajar">
+          <span>📚</span>
+          <span class="hidden sm:inline">Bahan Ajar</span>
+        </button>
+
+        <a href="guru.html" class="action-pill-btn text-emerald-700 border-emerald-200" title="Buka Portal Guru & Admin CMS">
           <span>⚙️</span>
           <span>Portal Guru</span>
         </a>
@@ -633,7 +638,34 @@ window.INLINE_BG_PETUNJUK = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/
     </div>
   </div>
 
-  <!-- 7. PORTAL GURU (ADMIN CMS DATABASE) -->
+  <!-- 7. MODAL BAHAN AJAR & LEMBAR KERJA (LKPD) -->
+  <div id="modalBahanAjar" class="modal-backdrop">
+    <div class="modal-window p-6 max-w-xl">
+      <div class="flex items-center justify-between border-b pb-4 mb-4 border-indigo-200">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-2xl shadow-md">📚</div>
+          <div>
+            <h3 class="text-lg font-bold text-indigo-950">Bahan Ajar & Lembar Kerja (LKPD)</h3>
+            <p class="text-xs text-indigo-700">Materi belajar, modul tema, dan lembar mewarnai anak</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modalBahanAjar')" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-lg">&times;</button>
+      </div>
+
+      <div class="space-y-2.5 max-h-80 overflow-y-auto pr-1" id="bahanAjarListContainer">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div class="flex justify-between items-center pt-4 border-t mt-4 text-xs">
+        <span class="text-slate-500">Materi diunggah oleh Guru TK Al Khoiriyah</span>
+        <button onclick="closeModal('modalBahanAjar')" class="btn-3d bg-slate-200 text-slate-700 text-xs py-2 px-4">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. PORTAL GURU (ADMIN CMS DATABASE) -->
   <div id="modalTeacherPortal" class="modal-backdrop">
     <div class="modal-window p-6 max-w-2xl">
       <div class="flex items-center justify-between border-b pb-4 mb-4 border-indigo-200">
@@ -720,7 +752,13 @@ window.INLINE_BG_PETUNJUK = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/
     ];
     let currentStoryIdx = 0;
 
-    const guidelineList = [
+    let bahanAjarList = [
+      { ID: 'BA01', Nama_Materi: 'Lembar Kerja Mewarnai Kubah Masjid', Jenis: 'PDF Dokumen', Ukuran: '1.2 MB', URL_Berkas: 'assets/lkpd_mewarnai.pdf' },
+      { ID: 'BA02', Nama_Materi: 'Kartu Huruf Hijaiyah Ceria', Jenis: 'PNG Gambar HD', Ukuran: '3.4 MB', URL_Berkas: 'assets/kartu_hijaiyah.png' },
+      { ID: 'BA03', Nama_Materi: 'Modul Ajar Tematik PAUD - Semester 1', Jenis: 'Modul Tematik', Ukuran: '2.1 MB', URL_Berkas: 'assets/modul_ajar.pdf' }
+    ];
+
+    let guidelineList = [
       "Mengenal Allah dan ciptaan-Nya",
       "Melatih kemampuan berpikir, berhitung, dan berkreasi",
       "Mengembangkan kemampuan menyimak dan berbahasa",
@@ -1000,7 +1038,7 @@ window.INLINE_BG_PETUNJUK = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/
     let currentGameType = 'hijaiyah';
     let gameScore = 0;
 
-    const gameQuestions = {
+    let gameQuestions = {
       hijaiyah: [
         { q: "Manakah huruf BA (ب) yang ada satu titik di bawah?", opts: ["Alif (أ)", "Ba (ب)", "Ta (ت)"], key: 1, sound: "Manakah huruf Ba yang ada satu titik di bawah?" },
         { q: "Manakah huruf TA (ت) yang memiliki dua titik di atas?", opts: ["Ba (ب)", "Ta (ت)", "Tsa (ث)"], key: 1, sound: "Manakah huruf Ta yang memiliki dua titik di atas?" },
@@ -1223,19 +1261,12 @@ window.INLINE_BG_PETUNJUK = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/
     }
 
     function syncFromBackend() {
-      // 1. Check local storage cache first
+      // 1. Check local storage cache first (Instant zero-latency)
       try {
         const cached = localStorage.getItem('TK_LOCAL_DATA');
         if (cached) {
           const cData = JSON.parse(cached);
-          if (cData.videos && cData.videos.length > 0) {
-            videoList = cData.videos.map(v => ({ id: v.ID || v.id, title: v.Judul || v.title, desc: v.Deskripsi || v.desc, url: v.URL_Video || v.url, type: v.Tipe || v.type }));
-            renderVideoChannels();
-          }
-          if (cData.stories && cData.stories.length > 0) {
-            storyPages = cData.stories.map(s => ({ page: s.Halaman || s.page, title: s.Judul_Halaman || s.title, text: s.Isi_Cerita || s.text, emoji: s.Ikon_Emoji || s.emoji || '📖' }));
-            renderStoryPage();
-          }
+          applySyncedData(cData);
         }
       } catch(e) {}
 
@@ -1246,18 +1277,101 @@ window.INLINE_BG_PETUNJUK = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/
           .then(res => res.json())
           .then(res => {
             if (res && res.status === 'success') {
-              if (res.videos && res.videos.length > 0) {
-                videoList = res.videos.map(v => ({ id: v.ID || v.id, title: v.Judul || v.title, desc: v.Deskripsi || v.desc, url: v.URL_Video || v.url, type: v.Tipe || v.type }));
-                renderVideoChannels();
-              }
-              if (res.stories && res.stories.length > 0) {
-                storyPages = res.stories.map(s => ({ page: s.Halaman || s.page, title: s.Judul_Halaman || s.title, text: s.Isi_Cerita || s.text, emoji: s.Ikon_Emoji || s.emoji || '📖' }));
-                renderStoryPage();
-              }
+              applySyncedData(res);
             }
           })
           .catch(err => console.log('Offline / using local cache'));
       }
+    }
+
+    function applySyncedData(data) {
+      if (!data) return;
+
+      // 1. Videos
+      if (data.videos && data.videos.length > 0) {
+        videoList = data.videos.map(v => ({
+          id: v.ID || v.id,
+          title: v.Judul || v.title,
+          desc: v.Deskripsi || v.desc,
+          url: v.URL_Video || v.url,
+          type: v.Tipe || v.type
+        }));
+        renderVideoChannels();
+      }
+
+      // 2. Story Pages
+      if (data.stories && data.stories.length > 0) {
+        storyPages = data.stories.map(s => ({
+          page: parseInt(s.Halaman || s.page) || 1,
+          title: s.Judul_Halaman || s.title,
+          text: s.Isi_Cerita || s.text,
+          emoji: s.Ikon_Emoji || s.emoji || '📖'
+        }));
+        storyPages.sort((a, b) => a.page - b.page);
+        renderStoryPage();
+      }
+
+      // 3. Bahan Ajar & Modul
+      if (data.bahanAjar && data.bahanAjar.length > 0) {
+        bahanAjarList = data.bahanAjar;
+        renderBahanAjar();
+      }
+
+      // 4. Capaian & Petunjuk (5 Poin)
+      if (data.guidelines && data.guidelines.length > 0) {
+        data.guidelines.forEach((g, idx) => {
+          if (idx < guidelineList.length) {
+            guidelineList[idx] = g.Judul || g.title || guidelineList[idx];
+          }
+        });
+      }
+
+      // 5. Game Edukasi Questions
+      if (data.games && data.games.length > 0) {
+        ['hijaiyah', 'balon', 'hewan'].forEach(type => {
+          const filtered = data.games.filter(g => (g.Jenis_Game || g.gameType) === type);
+          if (filtered.length > 0) {
+            gameQuestions[type] = filtered.map(g => ({
+              q: g.Soal || g.question,
+              opts: [g.Pilihan_A || g.optionA, g.Pilihan_B || g.optionB, g.Pilihan_C || g.optionC].filter(Boolean),
+              key: parseInt(g.Kunci_Jawaban !== undefined ? g.Kunci_Jawaban : g.correctAnswer) || 0,
+              sound: g.Suara_Teks || g.voiceText || g.Soal || g.question
+            }));
+          }
+        });
+        loadCurrentGameQuestion();
+      }
+
+      // 6. Identitas Satuan PAUD
+      if (data.identitas) {
+        const elTitle = document.getElementById('studentSchoolTitle');
+        const elGroup = document.getElementById('studentSchoolGroup');
+        if (elTitle && data.identitas.nama_sekolah) elTitle.innerText = data.identitas.nama_sekolah;
+        if (elGroup && data.identitas.kelompok) elGroup.innerText = `(${data.identitas.kelompok})`;
+      }
+    }
+
+    function renderBahanAjar() {
+      const container = document.getElementById('bahanAjarListContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      bahanAjarList.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'p-3 bg-indigo-50/70 border border-indigo-200 rounded-xl flex items-center justify-between text-xs hover:bg-indigo-50';
+        div.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <span class="text-xl">📄</span>
+            <div>
+              <div class="font-bold text-slate-900">${item.Nama_Materi || item.title}</div>
+              <div class="text-[10px] text-slate-500">${item.Jenis || 'Dokumen'} • ${item.Ukuran || '1.0 MB'}</div>
+            </div>
+          </div>
+          <a href="${item.URL_Berkas || '#'}" target="_blank" class="btn-3d bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] py-1.5 px-3">
+            Unduh
+          </a>
+        `;
+        container.appendChild(div);
+      });
     }
 
     function saveAdminVideo() {
@@ -1270,24 +1384,26 @@ window.INLINE_BG_PETUNJUK = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/
       const newVid = { id: 'VID' + Date.now(), title, desc, url, type: 'custom' };
       videoList.push(newVid);
       renderVideoChannels();
-
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(r => alert('Video berhasil disimpan ke database Google Sheets!'))
-          .apiSaveVideo({ title, description: desc, videoUrl: url, type: 'custom' });
-      } else {
-        alert('Video berhasil ditambahkan!');
-      }
+      alert('Video berhasil ditambahkan!');
 
       document.getElementById('adminVidTitle').value = '';
       document.getElementById('adminVidDesc').value = '';
       document.getElementById('adminVidUrl').value = '';
     }
 
+    // ================= REALTIME STORAGE LISTENER =================
+    // Auto-update student app immediately when teacher edits from Portal Guru
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'TK_LOCAL_DATA' || e.key === 'TK_DATA_UPDATED_AT') {
+        syncFromBackend();
+      }
+    });
+
     // ================= INITIALIZE =================
     window.addEventListener('DOMContentLoaded', () => {
       renderVideoChannels();
       renderStoryPage();
+      renderBahanAjar();
       syncFromBackend();
     });
   </script>
